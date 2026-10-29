@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg-parchment: #FDF8ED;
+  --bg-card: #FFFFFF;
+  --color-primary: #1A365D;
+  --color-secondary: #0D9488;
+  --color-accent-orange: #EA580C;
+  --color-accent-yellow: #F59E0B;
+  --color-accent-green: #16A34A;
+  --color-accent-blue: #2563EB;
+  --color-accent-red: #DC2626;
+  --color-accent-purple: #9333EA;
+  --text-dark: #1E293B;
+  --text-muted: #64748B;
+  --border-pencil: #E2D9C8;
+  --shadow-warm: 0 10px 25px -5px rgba(180, 83, 9, 0.08), 0 8px 10px -6px rgba(180, 83, 9, 0.04);
+  --shadow-float: 0 20px 30px -10px rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-parchment);
+  color: var(--text-dark);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Fundo com textura e estilo papel/caderno escolar */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(#e5d8b8 1px, transparent 1px),
+    linear-gradient(to right, rgba(235, 222, 195, 0.2) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: -1;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: 'Fredoka', cursive, sans-serif;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}

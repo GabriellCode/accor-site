@@ -1,0 +1,732 @@
+/* App.css - ACCOR Reforço Escolar */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Moldura de Lápis de Cor Colorida no Topo */
+.pencil-strip {
+  display: flex;
+  height: 10px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pencil-segment {
+  flex: 1;
+  height: 100%;
+}
+
+/* Header */
+.site-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px dashed #E2D9C8;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0.8rem 1.5rem;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.brand-logo-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1A365D;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.brand-sub {
+  font-size: 0.8rem;
+  background-color: #FEF3C7;
+  color: #B45309;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  border: 1px solid #FDE68A;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.btn-header-admin {
+  background: #F1F5F9;
+  color: #475569;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid #CBD5E1;
+}
+
+.btn-header-admin:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.btn-header-whatsapp {
+  background: #25D366;
+  color: #FFFFFF;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-header-whatsapp:hover {
+  background: #20BA5A;
+  transform: translateY(-2px);
+}
+
+/* Hero Section */
+.hero-section {
+  padding: 3rem 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.hero-info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.tag-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #EFF6FF;
+  color: #1D4ED8;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid #BFDBFE;
+}
+
+.tag-ufpe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #ECFDF5;
+  color: #047857;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid #A7F3D0;
+}
+
+.hero-title {
+  font-size: 3.2rem;
+  line-height: 1.1;
+  color: #0F172A;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hero-title .highlight {
+  color: #EA580C;
+  text-shadow: 2px 2px 0px #FEF3C7;
+}
+
+.hero-subtitle-reforco {
+  font-size: 1.6rem;
+  color: #2563EB;
+  letter-spacing: 2px;
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+}
+
+.hero-tagline-box {
+  background: #FFFBEB;
+  border-left: 5px solid #F59E0B;
+  border-radius: 0 12px 12px 0;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.8rem;
+}
+
+.hero-tagline-main {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #78350F;
+  margin-bottom: 0.3rem;
+}
+
+.hero-tagline-sub {
+  font-size: 1.05rem;
+  color: #92400E;
+  font-weight: 600;
+}
+
+.hero-cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary-action {
+  background: #EA580C;
+  color: #FFFFFF;
+  padding: 0.9rem 1.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.3);
+}
+
+.btn-primary-action:hover {
+  background: #C2410C;
+  transform: translateY(-2px);
+}
+
+.btn-whatsapp-action {
+  background: #25D366;
+  color: #FFFFFF;
+  padding: 0.9rem 1.8rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp-action:hover {
+  background: #1EBE5D;
+  transform: translateY(-2px);
+}
+
+.phone-quick-call {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1E293B;
+  padding: 0.5rem 0.8rem;
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px dashed #CBD5E1;
+  width: fit-content;
+}
+
+/* Poster Artwork Card Showcase */
+.poster-showcase-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.poster-frame {
+  background: #FFFFFF;
+  padding: 12px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 4px solid #FDE68A;
+  position: relative;
+  transform: rotate(1deg);
+  transition: transform 0.3s ease;
+  max-width: 440px;
+  width: 100%;
+}
+
+.poster-frame:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.poster-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+
+.poster-badge-original {
+  position: absolute;
+  top: -12px;
+  right: 15px;
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transform: rotate(3deg);
+}
+
+/* Disciplines Section */
+.section-wrapper {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.section-tag {
+  background: #FEE2E2;
+  color: #DC2626;
+  font-weight: 700;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  color: #0F172A;
+  margin-bottom: 0.5rem;
+}
+
+.section-desc {
+  color: #64748B;
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.disciplinas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.4rem;
+}
+
+.disciplina-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 2px solid #F1F5F9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.disciplina-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  border-color: #E2E8F0;
+}
+
+.card-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+}
+
+.disciplina-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.disciplina-category {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.disciplina-title {
+  font-size: 1.35rem;
+  color: #1E293B;
+  margin-bottom: 0.5rem;
+}
+
+.disciplina-text {
+  font-size: 0.92rem;
+  color: #64748B;
+  flex-grow: 1;
+}
+
+/* Metodologia / Beneficios */
+.methodology-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.method-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+  border: 1px solid #E2D9C8;
+}
+
+.method-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #EA580C;
+  opacity: 0.4;
+  margin-bottom: 0.4rem;
+}
+
+.method-card h3 {
+  font-size: 1.25rem;
+  color: #1E293B;
+  margin-bottom: 0.5rem;
+}
+
+.method-card p {
+  color: #64748B;
+  font-size: 0.95rem;
+}
+
+/* Form Section */
+.contact-container {
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 3px dashed #CBD5E1;
+  padding: 2.5rem;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 800px) {
+  .contact-container {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+}
+
+.form-info-col h3 {
+  font-size: 1.8rem;
+  color: #1E293B;
+  margin-bottom: 0.8rem;
+}
+
+.form-info-col p {
+  color: #475569;
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+
+.perks-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.perks-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.whatsapp-box-direct {
+  background: #F0FDF4;
+  border: 2px solid #BBF7D0;
+  border-radius: 16px;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.whatsapp-box-direct .phone {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #166534;
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.4rem;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #CBD5E1;
+  background: #F8FAFC;
+  font-size: 0.95rem;
+  color: #1E293B;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #2563EB;
+  background: #FFFFFF;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn-submit-form {
+  width: 100%;
+  background: #1A365D;
+  color: #FFFFFF;
+  padding: 0.95rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(26, 54, 93, 0.25);
+}
+
+.btn-submit-form:hover {
+  background: #0F2342;
+}
+
+.btn-submit-form:disabled {
+  background: #94A3B8;
+  cursor: not-allowed;
+}
+
+.form-status-alert {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-status-alert.success {
+  background: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
+}
+
+.form-status-alert.error {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+}
+
+/* Modal Admin / Requests in SQLite */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: 20px;
+  max-width: 750px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 1.2rem 1.5rem;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.solicitacao-item {
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  background: #F8FAFC;
+}
+
+.solicitacao-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.solicitacao-nome {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1E293B;
+}
+
+.solicitacao-status {
+  background: #FEF3C7;
+  color: #B45309;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.solicitacao-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.solicitacao-msg {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  background: #FFFFFF;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border-left: 3px solid #3B82F6;
+  font-style: italic;
+}
+
+/* Floating WhatsApp button */
+.floating-whatsapp {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: #25D366;
+  color: #FFFFFF;
+  border-radius: 999px;
+  padding: 0.75rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  z-index: 99;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.floating-whatsapp:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+}
+
+/* Footer */
+.site-footer {
+  margin-top: auto;
+  background: #0F172A;
+  color: #CBD5E1;
+  padding: 2.5rem 1.5rem 1.5rem;
+  border-top: 6px solid #F59E0B;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.footer-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.footer-copy {
+  font-size: 0.85rem;
+  color: #94A3B8;
+}
