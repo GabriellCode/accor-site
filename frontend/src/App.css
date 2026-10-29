@@ -1312,3 +1312,12 @@
 .star-btn-select:hover {
   transform: scale(1.2);
 }
+
+/* =========================================
+   MOTION BLUR GLOBAL AO SCROLLAR A PÁGINA
+========================================= */
+.scroll-motion-blur-content {
+  transition: filter 0.1s ease-out, transform 0.1s ease-out;
+  will-change: filter, transform;
+  transform-origin: center center;
+}

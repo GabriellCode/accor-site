@@ -114,6 +114,48 @@ function App() {
     resultado: ''
   })
 
+  // Efeito de Motion Blur dinâmico na página inteira ao rolar para cima e para baixo
+  const [scrollBlur, setScrollBlur] = useState({ blur: 0, scaleY: 1 })
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY
+    let ticking = false
+    let timeoutId = null
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      const delta = Math.abs(currentScrollY - lastScrollY)
+      lastScrollY = currentScrollY
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Calcula intensidade do blur baseado na velocidade do scroll (máximo de 4.5px para nitidez ágil)
+          const blurAmount = Math.min(delta * 0.08, 4.5)
+          const scaleAmount = 1 + Math.min(delta * 0.00025, 0.012)
+
+          setScrollBlur({
+            blur: blurAmount,
+            scaleY: scaleAmount
+          })
+          ticking = false
+        })
+        ticking = true
+      }
+
+      // Restaura nitidez imediatamente após cessar o scroll
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        setScrollBlur({ blur: 0, scaleY: 1 })
+      }, 70)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
   // Estado do formulário de agendamento / contato
   const [formData, setFormData] = useState({
     nomeResponsavel: '',
@@ -352,7 +394,15 @@ function App() {
         </div>
       </header>
 
-      {/* Hero Section com o Design Baseado na Imagem Oficial */}
+      {/* Conteúdo da Página com Efeito de Motion Blur Dinâmico ao Subir e Descer a Tela */}
+      <main 
+        className="scroll-motion-blur-content"
+        style={{
+          filter: scrollBlur.blur > 0.25 ? `blur(${scrollBlur.blur.toFixed(1)}px)` : 'none',
+          transform: scrollBlur.scaleY > 1.001 ? `scaleY(${scrollBlur.scaleY.toFixed(3)})` : 'none',
+        }}
+      >
+        {/* Hero Section com o Design Baseado na Imagem Oficial */}
       <section className="hero-section">
         <div className="hero-grid">
           <div className="hero-content">
@@ -1007,6 +1057,7 @@ function App() {
           </div>
         </div>
       </footer>
+      </main>
     </div>
   )
 }
