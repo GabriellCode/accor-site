@@ -1314,10 +1314,34 @@
 }
 
 /* =========================================
-   MOTION BLUR GLOBAL AO SCROLLAR A PÁGINA
+   OTIMIZAÇÕES DE PERFORMANCE PARA 60+ FPS
+========================================= */
+
+/* Promoção para camada GPU dedicada e renderização assíncrona */
+.section-wrapper {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 650px;
+  contain: layout style;
+}
+
+.disciplina-card,
+.method-card,
+.teacher-profile-wrapper,
+.avaliacoes-container,
+.contact-container {
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* =========================================
+   MOTION BLUR GLOBAL AO SCROLLAR A PÁGINA (GPU 60-120 FPS)
 ========================================= */
 .scroll-motion-blur-content {
-  transition: filter 0.1s ease-out, transform 0.1s ease-out;
-  will-change: filter, transform;
-  transform-origin: center center;
+  will-change: transform, filter;
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-origin: center top;
 }

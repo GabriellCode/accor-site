@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   BookOpen, 
   MapPin, 
@@ -114,45 +114,72 @@ function App() {
     resultado: ''
   })
 
-  // Efeito de Motion Blur dinâmico na página inteira ao rolar para cima e para baixo
-  const [scrollBlur, setScrollBlur] = useState({ blur: 0, scaleY: 1 })
+  // Referência direta ao DOM para Motion Blur sem disparar re-renderizações do React (60+ FPS estável)
+  const contentRef = useRef(null)
 
   useEffect(() => {
     let lastScrollY = window.scrollY
-    let ticking = false
-    let timeoutId = null
+    let targetBlur = 0
+    let currentBlur = 0
+    let targetScale = 1
+    let currentScale = 1
+    let rafId = null
+    let isRunning = false
+    let resetTimer = null
+
+    // Motor de física suave usando interpolação linear (LERP) acelerada por GPU
+    const updatePhysics = () => {
+      currentBlur += (targetBlur - currentBlur) * 0.35
+      currentScale += (targetScale - currentScale) * 0.35
+
+      if (contentRef.current) {
+        if (currentBlur > 0.15) {
+          contentRef.current.style.filter = `blur(${currentBlur.toFixed(1)}px)`
+          contentRef.current.style.transform = `translate3d(0, 0, 0) scaleY(${currentScale.toFixed(3)})`
+        } else {
+          contentRef.current.style.filter = 'none'
+          contentRef.current.style.transform = 'translate3d(0, 0, 0)'
+        }
+      }
+
+      // Continua enquanto houver velocidade residual
+      if (Math.abs(targetBlur - currentBlur) > 0.05 || currentBlur > 0.1) {
+        rafId = requestAnimationFrame(updatePhysics)
+      } else {
+        isRunning = false
+        if (contentRef.current) {
+          contentRef.current.style.filter = 'none'
+          contentRef.current.style.transform = 'translate3d(0, 0, 0)'
+        }
+      }
+    }
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const delta = Math.abs(currentScrollY - lastScrollY)
       lastScrollY = currentScrollY
 
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          // Calcula intensidade do blur baseado na velocidade do scroll (máximo de 4.5px para nitidez ágil)
-          const blurAmount = Math.min(delta * 0.08, 4.5)
-          const scaleAmount = 1 + Math.min(delta * 0.00025, 0.012)
+      // Limita a um valor visual agradável sem causar overhead na placa gráfica
+      targetBlur = Math.min(delta * 0.065, 3.8)
+      targetScale = 1 + Math.min(delta * 0.00018, 0.008)
 
-          setScrollBlur({
-            blur: blurAmount,
-            scaleY: scaleAmount
-          })
-          ticking = false
-        })
-        ticking = true
+      clearTimeout(resetTimer)
+      resetTimer = setTimeout(() => {
+        targetBlur = 0
+        targetScale = 1
+      }, 50)
+
+      if (!isRunning) {
+        isRunning = true
+        rafId = requestAnimationFrame(updatePhysics)
       }
-
-      // Restaura nitidez imediatamente após cessar o scroll
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        setScrollBlur({ blur: 0, scaleY: 1 })
-      }, 70)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      clearTimeout(timeoutId)
+      if (rafId) cancelAnimationFrame(rafId)
+      clearTimeout(resetTimer)
     }
   }, [])
 
@@ -394,14 +421,8 @@ function App() {
         </div>
       </header>
 
-      {/* Conteúdo da Página com Efeito de Motion Blur Dinâmico ao Subir e Descer a Tela */}
-      <main 
-        className="scroll-motion-blur-content"
-        style={{
-          filter: scrollBlur.blur > 0.25 ? `blur(${scrollBlur.blur.toFixed(1)}px)` : 'none',
-          transform: scrollBlur.scaleY > 1.001 ? `scaleY(${scrollBlur.scaleY.toFixed(3)})` : 'none',
-        }}
-      >
+      {/* Conteúdo da Página com Efeito de Motion Blur em 60+ FPS via GPU (Sem re-renderizações) */}
+      <main ref={contentRef} className="scroll-motion-blur-content">
         {/* Hero Section com o Design Baseado na Imagem Oficial */}
       <section className="hero-section">
         <div className="hero-grid">
@@ -459,6 +480,8 @@ function App() {
                 src="/accor-poster.jpg" 
                 alt="ACCOR Reforço Escolar - Arte Oficial" 
                 className="poster-img"
+                decoding="async"
+                loading="eager"
               />
             </div>
           </div>
@@ -484,6 +507,8 @@ function App() {
                   src="/professora.jpg" 
                   alt="Professora do ACCOR Reforço Escolar" 
                   className="teacher-photo-img" 
+                  decoding="async"
+                  loading="lazy"
                 />
                 <span className="teacher-photo-badge">
                   <GraduationCap size={14} /> Especialista UFPE
