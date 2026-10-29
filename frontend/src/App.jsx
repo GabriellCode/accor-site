@@ -19,6 +19,8 @@ import {
   User, 
   ShieldCheck,
   Database,
+  Award,
+  Heart,
   X
 } from 'lucide-react'
 import './App.css'
@@ -185,6 +187,13 @@ function App() {
             <span className="brand-sub">REFORÇO ESCOLAR</span>
           </div>
 
+          <nav className="header-nav">
+            <a href="#sobre" className="header-nav-link">A Professora</a>
+            <a href="#disciplinas" className="header-nav-link">Disciplinas</a>
+            <a href="#metodologia" className="header-nav-link">Diferenciais</a>
+            <a href="#contato" className="header-nav-link">Agendamento</a>
+          </nav>
+
           <div className="header-actions">
             <button 
               className="btn-header-admin" 
@@ -274,8 +283,104 @@ function App() {
         </div>
       </section>
 
+      {/* Seção de Apresentação da Professora */}
+      <section id="sobre" className="section-wrapper">
+        <div className="section-header">
+          <span className="section-tag">Acolhimento & Experiência Pedagógica</span>
+          <h2 className="section-title">Conheça a Professora</h2>
+          <p className="section-desc">
+            Compromisso com o aprendizado individualizado, respeito ao tempo de cada aluno e formação pela Universidade Federal de Pernambuco.
+          </p>
+        </div>
+
+        <div className="teacher-profile-wrapper">
+          <div className="teacher-grid">
+            {/* Cartão Visual da Professora com Foto Real */}
+            <div className="teacher-card-visual">
+              <div className="teacher-photo-container">
+                <img 
+                  src="/professora.jpg" 
+                  alt="Professora do ACCOR Reforço Escolar" 
+                  className="teacher-photo-img" 
+                />
+                <span className="teacher-photo-badge">
+                  <GraduationCap size={14} /> Especialista UFPE
+                </span>
+              </div>
+              <h4 className="teacher-card-name">Professora Responsável</h4>
+              <p className="teacher-card-role">ACCOR Reforço Escolar • Aldeia</p>
+
+              <div className="teacher-card-pills">
+                <div className="teacher-pill-item">
+                  <MapPin size={15} color="#2563EB" /> Atendimento em domicílio em Aldeia
+                </div>
+                <div className="teacher-pill-item">
+                  <Award size={15} color="#D97706" /> Formada pela UFPE
+                </div>
+                <div className="teacher-pill-item">
+                  <Heart size={15} color="#DC2626" /> Metodologia Afetiva & Ativa
+                </div>
+              </div>
+            </div>
+
+            {/* Conteúdo e Filosofia de Ensino */}
+            <div className="teacher-info-content">
+              <h3>"Aprender com afeto e método devolve a confiança ao estudante."</h3>
+              <p className="teacher-intro-lead">
+                Educação personalizada que respeita o ritmo e potencializa os pontos fortes do seu filho.
+              </p>
+              <p className="teacher-bio-text">
+                Com base acadêmica sólida pela <strong>Universidade Federal de Pernambuco (UFPE)</strong>, dedico-me a auxiliar estudantes do Ensino Fundamental e Médio a superarem bloqueios, recuperarem o rendimento escolar e desenvolverem gosto genuíno pelo estudo.
+              </p>
+              <p className="teacher-bio-text">
+                Sabemos que a rotina escolar coletiva muitas vezes deixa dúvidas para trás. O trabalho do <strong>ACCOR Reforço Escolar</strong> é levar o ensino de alto padrão até a sua casa em Aldeia, criando um espaço acolhedor, sem pressões desnecessárias, focado em resultados reais.
+              </p>
+
+              <div className="teacher-quote-box">
+                “Cada aluno tem sua própria maneira de compreender o mundo. Nosso papel não é apenas passar a resposta correta, mas desenvolver o raciocínio, a segurança e a autonomia.”
+              </div>
+
+              <div className="teacher-credentials-grid">
+                <div className="teacher-cred-item">
+                  <CheckCircle2 size={18} color="#16A34A" />
+                  <span>Aulas 100% individuais e sob medida</span>
+                </div>
+                <div className="teacher-cred-item">
+                  <CheckCircle2 size={18} color="#16A34A" />
+                  <span>Apoio em tarefas escolares e fixação prática</span>
+                </div>
+                <div className="teacher-cred-item">
+                  <CheckCircle2 size={18} color="#16A34A" />
+                  <span>Preparação estratégica para provas e simulados</span>
+                </div>
+                <div className="teacher-cred-item">
+                  <CheckCircle2 size={18} color="#16A34A" />
+                  <span>Relatórios periódicos de evolução para os pais</span>
+                </div>
+              </div>
+
+              <div className="teacher-cta-actions">
+                <a 
+                  href={whatsappLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn-whatsapp-action"
+                >
+                  <MessageCircle size={18} />
+                  Falar com a Professora no WhatsApp
+                </a>
+                <a href="#contato" className="btn-primary-action">
+                  <Calendar size={18} />
+                  Solicitar Agendamento
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Seção das Disciplinas Oferecidas */}
-      <section className="section-wrapper">
+      <section id="disciplinas" className="section-wrapper">
         <div className="section-header">
           <span className="section-tag">Aulas Personalizadas</span>
           <h2 className="section-title">Disciplinas Atendidas</h2>

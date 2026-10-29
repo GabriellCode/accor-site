@@ -12,13 +12,19 @@ public class EscolaInfoDTO {
     private String whatsapp;
     private String whatsappDisplay;
     private List<String> disciplinas;
+    private String nomeProfessora;
+    private String bioProfessora;
+    private String filosofiaEnsino;
+    private List<String> destaquesProfessora;
 
     public EscolaInfoDTO() {
     }
 
     public EscolaInfoDTO(String nome, String subtitulo, String localizacao, String formacao,
                          String slogan, String descricaoMetodo, String whatsapp,
-                         String whatsappDisplay, List<String> disciplinas) {
+                         String whatsappDisplay, List<String> disciplinas,
+                         String nomeProfessora, String bioProfessora, String filosofiaEnsino,
+                         List<String> destaquesProfessora) {
         this.nome = nome;
         this.subtitulo = subtitulo;
         this.localizacao = localizacao;
@@ -28,6 +34,10 @@ public class EscolaInfoDTO {
         this.whatsapp = whatsapp;
         this.whatsappDisplay = whatsappDisplay;
         this.disciplinas = disciplinas;
+        this.nomeProfessora = nomeProfessora;
+        this.bioProfessora = bioProfessora;
+        this.filosofiaEnsino = filosofiaEnsino;
+        this.destaquesProfessora = destaquesProfessora;
     }
 
     public String getNome() {
@@ -100,5 +110,37 @@ public class EscolaInfoDTO {
 
     public void setDisciplinas(List<String> disciplinas) {
         this.disciplinas = disciplinas;
+    }
+
+    public String getNomeProfessora() {
+        return nomeProfessora;
+    }
+
+    public void setNomeProfessora(String nomeProfessora) {
+        this.nomeProfessora = nomeProfessora;
+    }
+
+    public String getBioProfessora() {
+        return bioProfessora;
+    }
+
+    public void setBioProfessora(String bioProfessora) {
+        this.bioProfessora = bioProfessora;
+    }
+
+    public String getFilosofiaEnsino() {
+        return filosofiaEnsino;
+    }
+
+    public void setFilosofiaEnsino(String filosofiaEnsino) {
+        this.filosofiaEnsino = filosofiaEnsino;
+    }
+
+    public List<String> getDestaquesProfessora() {
+        return destaquesProfessora;
+    }
+
+    public void setDestaquesProfessora(List<String> destaquesProfessora) {
+        this.destaquesProfessora = destaquesProfessora;
     }
 }

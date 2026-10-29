@@ -32,6 +32,15 @@ public class InfoController {
                 "Biologia",
                 "História",
                 "Geografia"
+            ),
+            "Professora Especialista UFPE",
+            "Com formação de excelência pela Universidade Federal de Pernambuco (UFPE) e vocação para o ensino humanizado, dedico-me a acompanhar cada aluno de maneira única, identificando onde residem as dificuldades reais para construir uma base sólida e duradoura de conhecimento.",
+            "Acredito que nenhum estudante deve se sentir incapaz diante de uma disciplina. Com o método certo, empatia e aulas individuais no conforto de casa em Aldeia, o aprendizado deixa de ser um peso e se torna motivo de orgulho.",
+            Arrays.asList(
+                "Graduação e especialização pela UFPE",
+                "Atendimento domiciliar exclusivo em Aldeia e redondezas",
+                "Metodologia ativa focada no ritmo de cada estudante",
+                "Acompanhamento contínuo de tarefas, provas e vestibulares"
             )
         );
     }
