@@ -183,6 +183,33 @@ function App() {
     }
   }, [])
 
+  // Controle de visibilidade do Navbar (some ao rolar para o rodapé, reaparece no topo ou no hover)
+  const [navVisivel, setNavVisivel] = useState(true)
+
+  useEffect(() => {
+    let ultimoScrollY = window.scrollY
+
+    const monitorarScrollNav = () => {
+      const scrollAtual = window.scrollY
+
+      if (scrollAtual <= 60) {
+        // No topo da página: sempre visível
+        setNavVisivel(true)
+      } else if (scrollAtual > ultimoScrollY + 8) {
+        // Rolando para baixo em direção ao footer: esconde a barra
+        setNavVisivel(false)
+      } else if (scrollAtual < ultimoScrollY - 12) {
+        // Rolando para cima: reaparece
+        setNavVisivel(true)
+      }
+
+      ultimoScrollY = scrollAtual
+    }
+
+    window.addEventListener('scroll', monitorarScrollNav, { passive: true })
+    return () => window.removeEventListener('scroll', monitorarScrollNav)
+  }, [])
+
   // Estado do formulário de agendamento / contato
   const [formData, setFormData] = useState({
     nomeResponsavel: '',
@@ -370,56 +397,71 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Faixa Superior com Lápis de Cor Coloridos (Identidade da Arte) */}
-      <div className="pencil-strip">
-        {pencilColors.map((cor, i) => (
-          <div key={i} className="pencil-segment" style={{ backgroundColor: cor }} />
-        ))}
-      </div>
+      {/* Sensor invisível no topo da janela: quando o mouse passa no topo, faz o navbar reaparecer */}
+      <div 
+        className="nav-hover-trigger"
+        onMouseEnter={() => setNavVisivel(true)}
+      />
 
-      {/* Header Fixo */}
-      <header className="site-header">
-        <div className="header-content">
-          <div className="brand-badge-group">
-            <span className="brand-logo-text">
-              ✏️ ACCOR
-            </span>
-            <span className="brand-sub">REFORÇO ESCOLAR</span>
-          </div>
-
-          <nav className="header-nav">
-            <a href="#sobre" className="header-nav-link">A Professora</a>
-            <a href="#disciplinas" className="header-nav-link">Disciplinas</a>
-            <a href="#metodologia" className="header-nav-link">Diferenciais</a>
-            <a href="#avaliacoes" className="header-nav-link">Avaliações</a>
-            <a href="#contato" className="header-nav-link">Agendamento</a>
-          </nav>
-
-          <div className="header-actions">
-            <button 
-              className="btn-header-admin" 
-              onClick={() => {
-                setModalAdminAberto(true)
-                carregarSolicitacoes()
-              }}
-              title="Ver contatos salvos no banco SQLite"
-            >
-              <Database size={16} />
-              <span>Painel SQLite</span>
-            </button>
-
-            <a 
-              href={whatsappLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="btn-header-whatsapp"
-            >
-              <MessageCircle size={18} />
-              <span>(81) 9.9122-5450</span>
-            </a>
-          </div>
+      {/* Cabeçalho inteligente: recolhe ao rolar para baixo e reaparece no topo ou hover */}
+      <div 
+        className={`header-sticky-wrapper ${navVisivel ? 'nav-visible' : 'nav-hidden'}`}
+        onMouseEnter={() => setNavVisivel(true)}
+        onMouseLeave={() => {
+          if (window.scrollY > 80) setNavVisivel(false)
+        }}
+      >
+        {/* Faixa Superior com Lápis de Cor Coloridos (Identidade da Arte) */}
+        <div className="pencil-strip">
+          {pencilColors.map((cor, i) => (
+            <div key={i} className="pencil-segment" style={{ backgroundColor: cor }} />
+          ))}
         </div>
-      </header>
+
+        {/* Header */}
+        <header className="site-header">
+          <div className="header-content">
+            <div className="brand-badge-group">
+              <span className="brand-logo-text">
+                ✏️ ACCOR
+              </span>
+              <span className="brand-sub">REFORÇO ESCOLAR</span>
+            </div>
+
+            <nav className="header-nav">
+              <a href="#sobre" className="header-nav-link">A Professora</a>
+              <a href="#disciplinas" className="header-nav-link">Disciplinas</a>
+              <a href="#metodologia" className="header-nav-link">Diferenciais</a>
+              <a href="#avaliacoes" className="header-nav-link">Avaliações</a>
+              <a href="#contato" className="header-nav-link">Agendamento</a>
+            </nav>
+
+            <div className="header-actions">
+              <button 
+                className="btn-header-admin" 
+                onClick={() => {
+                  setModalAdminAberto(true)
+                  carregarSolicitacoes()
+                }}
+                title="Ver contatos salvos no banco SQLite"
+              >
+                <Database size={16} />
+                <span>Painel SQLite</span>
+              </button>
+
+              <a 
+                href={whatsappLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-header-whatsapp"
+              >
+                <MessageCircle size={18} />
+                <span>(81) 9.9122-5450</span>
+              </a>
+            </div>
+          </div>
+        </header>
+      </div>
 
       {/* Conteúdo da Página com Efeito de Motion Blur em 60+ FPS via GPU (Sem re-renderizações) */}
       <main ref={contentRef} className="scroll-motion-blur-content">

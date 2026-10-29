@@ -4,12 +4,47 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding-top: 76px; /* Espaço para o cabeçalho fixo */
+}
+
+/* Sensor invisível no topo da tela para capturar a aproximação do cursor do mouse */
+.nav-hover-trigger {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  z-index: 99;
+  pointer-events: auto;
+}
+
+/* Wrapper fixo do cabeçalho retrátil com transição suave */
+.header-sticky-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  transform: translateY(0);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.header-sticky-wrapper.nav-hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.header-sticky-wrapper.nav-visible,
+.header-sticky-wrapper:hover {
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
 }
 
 /* Moldura de Lápis de Cor Colorida no Topo */
 .pencil-strip {
   display: flex;
-  height: 10px;
+  height: 8px;
   width: 100%;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -22,13 +57,10 @@
 
 /* Header */
 .site-header {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
   border-bottom: 2px dashed #E2D9C8;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  padding: 0.8rem 1.5rem;
+  padding: 0.75rem 1.5rem;
 }
 
 .header-content {
