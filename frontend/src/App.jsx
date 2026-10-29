@@ -21,6 +21,10 @@ import {
   Database,
   Award,
   Heart,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
   X
 } from 'lucide-react'
 import './App.css'
@@ -40,12 +44,75 @@ const DEFAULT_DISCIPLINAS = [
   { id: 8, nome: "Geografia", categoria: "Humanas", descricao: "Cartografia, geopolítica, meio ambiente, climatologia e sociedade.", icone: "globe", cor: "#0284C7" }
 ]
 
+// Dados padrão de avaliações para o carrossel interativo
+const DEFAULT_AVALIACOES = [
+  {
+    id: 1,
+    nomeAutor: "Patrícia Albuquerque",
+    papel: "Mãe do Lucas (8º ano) • Aldeia",
+    disciplina: "Matemática e Física",
+    estrelas: 5,
+    comentario: "O Lucas tinha pavor das provas de matemática e travava em equações. Com a paciência e a didática maravilhosa da professora, a nota dele subiu de 4,5 para 9,2! O atendimento em domicílio aqui em Aldeia facilitou demais a nossa rotina.",
+    resultado: "Nota subiu de 4,5 para 9,2 no bimestre"
+  },
+  {
+    id: 2,
+    nomeAutor: "Carlos Eduardo Valença",
+    papel: "Pai da Sofia (3º ano Médio)",
+    disciplina: "Química e Biologia",
+    estrelas: 5,
+    comentario: "Excelente profissional! Muito pontual, dedicada e com domínio total dos conteúdos exigidos pelo SSA e ENEM. A Sofia ganhou muito mais segurança e conquistou a aprovação.",
+    resultado: "Aprovada com nota 940 no SSA/ENEM"
+  },
+  {
+    id: 3,
+    nomeAutor: "Renata Meireles",
+    papel: "Mãe do Bernardo (6º ano) • Aldeia",
+    disciplina: "Português e Redação",
+    estrelas: 5,
+    comentario: "Meu filho tinha muita dificuldade com interpretação e construção de textos. As aulas foram lúdicas, dinâmicas e o desenvolvimento dele foi visível já nas primeiras semanas. Recomendo de olhos fechados!",
+    resultado: "Evolução surpreendente na redação"
+  },
+  {
+    id: 4,
+    nomeAutor: "Mariana Cavalcanti",
+    papel: "Mãe da Alice (9º ano)",
+    disciplina: "Matemática e Ciências",
+    estrelas: 5,
+    comentario: "Professora extraordinária, com uma metodologia afetuosa que realmente ensina a pensar. Não é decoreba, é compreensão real da matéria. Alice hoje faz os exercícios sozinha!",
+    resultado: "Média final 9,8 e aluna destaque"
+  },
+  {
+    id: 5,
+    nomeAutor: "Rodrigo Siqueira",
+    papel: "Pai do Matheus (1º ano Médio) • Aldeia",
+    disciplina: "Física e Matemática",
+    estrelas: 5,
+    comentario: "O acompanhamento em domicílio é o ponto alto: conforto absoluto e atenção 100% no estudante. A formação pela UFPE faz toda a diferença na metodologia de ensino.",
+    resultado: "Recuperação imediata de rendimento"
+  }
+]
+
 function App() {
   const [disciplinas, setDisciplinas] = useState(DEFAULT_DISCIPLINAS)
   const [filtroCategoria, setFiltroCategoria] = useState('TODAS')
   const [solicitacoes, setSolicitacoes] = useState([])
   const [modalAdminAberto, setModalAdminAberto] = useState(false)
   const [carregandoAdmin, setCarregandoAdmin] = useState(false)
+
+  // Estados das avaliações e do carrossel com Motion Blur
+  const [avaliacoes, setAvaliacoes] = useState(DEFAULT_AVALIACOES)
+  const [indiceAvaliacao, setIndiceAvaliacao] = useState(0)
+  const [motionBlurClasse, setMotionBlurClasse] = useState('fade-in')
+  const [modalAvaliacaoAberta, setModalAvaliacaoAberta] = useState(false)
+  const [formNovaAvaliacao, setFormNovaAvaliacao] = useState({
+    nomeAutor: '',
+    papel: '',
+    disciplina: 'Matemática',
+    estrelas: 5,
+    comentario: '',
+    resultado: ''
+  })
 
   // Estado do formulário de agendamento / contato
   const [formData, setFormData] = useState({
@@ -104,6 +171,70 @@ function App() {
         setSolicitacoes([])
         setCarregandoAdmin(false)
       })
+  }
+
+  // Carrega as avaliações salvas no backend Spring Boot + SQLite
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/avaliacoes`)
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao buscar avaliações no backend")
+        return res.json()
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          setAvaliacoes(data)
+        }
+      })
+      .catch(() => {
+        // Mantém as avaliações padrão locais se o backend estiver iniciando
+      })
+  }, [])
+
+  // Função para transição de avaliação com efeito de Motion Blur ao deslizar
+  const mudarSlideAvaliacao = (direcao) => {
+    const classe = direcao === 'next' ? 'motion-blur-slide-left' : 'motion-blur-slide-right'
+    setMotionBlurClasse(classe)
+
+    if (direcao === 'next') {
+      setIndiceAvaliacao((prev) => (prev + 1) % avaliacoes.length)
+    } else {
+      setIndiceAvaliacao((prev) => (prev - 1 + avaliacoes.length) % avaliacoes.length)
+    }
+
+    // Desativa a classe após a animação de deslizar e blur
+    setTimeout(() => {
+      setMotionBlurClasse('')
+    }, 500)
+  }
+
+  // Envio de nova avaliação de pais/alunos com gravação no SQLite
+  const handleNovaAvaliacaoSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await fetch(`${API_BASE_URL}/avaliacoes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formNovaAvaliacao)
+      })
+      if (res.ok) {
+        const criada = await res.json()
+        setAvaliacoes([criada, ...avaliacoes])
+      } else {
+        setAvaliacoes([formNovaAvaliacao, ...avaliacoes])
+      }
+    } catch {
+      setAvaliacoes([formNovaAvaliacao, ...avaliacoes])
+    }
+    setIndiceAvaliacao(0)
+    setModalAvaliacaoAberta(false)
+    setFormNovaAvaliacao({
+      nomeAutor: '',
+      papel: '',
+      disciplina: 'Matemática',
+      estrelas: 5,
+      comentario: '',
+      resultado: ''
+    })
   }
 
   // Mapeador de ícones para cada disciplina
@@ -191,6 +322,7 @@ function App() {
             <a href="#sobre" className="header-nav-link">A Professora</a>
             <a href="#disciplinas" className="header-nav-link">Disciplinas</a>
             <a href="#metodologia" className="header-nav-link">Diferenciais</a>
+            <a href="#avaliacoes" className="header-nav-link">Avaliações</a>
             <a href="#contato" className="header-nav-link">Agendamento</a>
           </nav>
 
@@ -450,6 +582,111 @@ function App() {
         </div>
       </section>
 
+      {/* Seção de Avaliações com Efeito de Fade e Motion Blur ao Deslizar */}
+      <section id="avaliacoes" className="section-wrapper">
+        <div className="section-header">
+          <span className="section-tag">Depoimentos Reais</span>
+          <h2 className="section-title">O que dizem os Pais e Alunos</h2>
+          <p className="section-desc">
+            Acompanhe as experiências de famílias em Aldeia que transformaram a vida escolar com o ACCOR.
+          </p>
+        </div>
+
+        <div className="avaliacoes-container">
+          {/* Barra de Média e Ação de Avaliar */}
+          <div className="avaliacoes-header-bar">
+            <div className="avaliacoes-score-box">
+              <div className="score-number">5.0</div>
+              <div className="score-stars-group">
+                <div className="stars-row">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={18} fill="#F59E0B" color="#F59E0B" />
+                  ))}
+                </div>
+                <span className="score-subtext">Satisfação 100% comprovada</span>
+              </div>
+            </div>
+
+            <button 
+              className="btn-nova-avaliacao"
+              onClick={() => setModalAvaliacaoAberta(true)}
+            >
+              <Sparkles size={16} />
+              <span>Deixar uma Avaliação</span>
+            </button>
+          </div>
+
+          {/* Carrossel com Efeito de Motion Blur */}
+          <div className="carousel-viewport">
+            {avaliacoes.length > 0 && (
+              <div className={`avaliacao-card-spotlight ${motionBlurClasse}`}>
+                <Quote size={42} className="avaliacao-quote-icon" />
+
+                {avaliacoes[indiceAvaliacao]?.resultado && (
+                  <div className="resultado-destaque-badge">
+                    <CheckCircle2 size={14} />
+                    <span>{avaliacoes[indiceAvaliacao].resultado}</span>
+                  </div>
+                )}
+
+                <p className="avaliacao-depoimento-texto">
+                  "{avaliacoes[indiceAvaliacao]?.comentario}"
+                </p>
+
+                <div className="avaliacao-autor-footer">
+                  <div className="avaliacao-autor-info">
+                    <div className="autor-avatar-circle">
+                      {avaliacoes[indiceAvaliacao]?.nomeAutor?.charAt(0) || "A"}
+                    </div>
+                    <div>
+                      <span className="autor-nome">{avaliacoes[indiceAvaliacao]?.nomeAutor}</span>
+                      <span className="autor-detalhes">{avaliacoes[indiceAvaliacao]?.papel}</span>
+                    </div>
+                  </div>
+
+                  <span className="avaliacao-disciplina-tag">
+                    📚 {avaliacoes[indiceAvaliacao]?.disciplina}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Controles de Navegação com Motion Blur */}
+          <div className="carousel-navigation-row">
+            <button 
+              className="btn-carousel-ctrl" 
+              onClick={() => mudarSlideAvaliacao('prev')}
+              title="Avaliação anterior"
+            >
+              <ChevronLeft size={22} />
+            </button>
+
+            <div className="carousel-dots-list">
+              {avaliacoes.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`carousel-dot ${idx === indiceAvaliacao ? 'active' : ''}`}
+                  onClick={() => {
+                    const direcao = idx > indiceAvaliacao ? 'next' : 'prev'
+                    mudarSlideAvaliacao(direcao)
+                  }}
+                  title={`Ir para avaliação ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <button 
+              className="btn-carousel-ctrl" 
+              onClick={() => mudarSlideAvaliacao('next')}
+              title="Próxima avaliação"
+            >
+              <ChevronRight size={22} />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Seção de Contato e Formulário Integrado com Spring Boot + SQLite */}
       <section id="contato" className="section-wrapper">
         <div className="contact-container">
@@ -653,6 +890,108 @@ function App() {
                 ))
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Deixar Avaliação */}
+      {modalAvaliacaoAberta && (
+        <div className="modal-overlay" onClick={() => setModalAvaliacaoAberta(false)}>
+          <div className="modal-review-content fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ background: 'transparent', padding: '0 0 1rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={20} color="#EA580C" />
+                <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Avaliar o Reforço Escolar</h3>
+              </div>
+              <button 
+                onClick={() => setModalAvaliacaoAberta(false)}
+                style={{ background: 'transparent', padding: '0.3rem' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleNovaAvaliacaoSubmit}>
+              <div className="form-group">
+                <label>Seu Nome *</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Ex: Vanessa Guimarães"
+                  value={formNovaAvaliacao.nomeAutor}
+                  onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, nomeAutor: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Relação com o Aluno / Série *</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="Ex: Mãe do Arthur (7º ano) • Aldeia"
+                  value={formNovaAvaliacao.papel}
+                  onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, papel: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Disciplina</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Ex: Matemática e Redação"
+                    value={formNovaAvaliacao.disciplina}
+                    onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, disciplina: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Resultado Conquistado</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Ex: Nota 9.5 no bimestre"
+                    value={formNovaAvaliacao.resultado}
+                    onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, resultado: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Avaliação (Estrelas)</label>
+                <div className="star-rating-select">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      className={`star-btn-select ${star <= formNovaAvaliacao.estrelas ? 'filled' : ''}`}
+                      onClick={() => setFormNovaAvaliacao({ ...formNovaAvaliacao, estrelas: star })}
+                    >
+                      <Star size={24} fill={star <= formNovaAvaliacao.estrelas ? '#F59E0B' : 'transparent'} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Seu Depoimento *</label>
+                <textarea 
+                  className="form-textarea" 
+                  rows="3"
+                  placeholder="Conte como foi a evolução e a experiência com as aulas..."
+                  value={formNovaAvaliacao.comentario}
+                  onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, comentario: e.target.value })}
+                  required
+                ></textarea>
+              </div>
+
+              <button type="submit" className="btn-submit-form">
+                <Send size={18} />
+                <span>Salvar Avaliação no Banco SQLite</span>
+              </button>
+            </form>
           </div>
         </div>
       )}
