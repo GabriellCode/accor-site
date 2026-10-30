@@ -1537,3 +1537,349 @@
   transform: translateY(-2px);
   filter: brightness(1.05);
 }
+
+/* =========================================
+   ÁREA ADMINISTRATIVA (LOGIN & DASHBOARD)
+========================================= */
+
+.admin-screen-container {
+  min-height: 100vh;
+  background: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tela de Login */
+.admin-login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+}
+
+.admin-login-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 2.5rem;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #E2E8F0;
+  text-align: center;
+}
+
+.login-lock-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #2563EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+}
+
+.admin-login-title {
+  font-size: 1.7rem;
+  color: #0F172A;
+  margin-bottom: 0.3rem;
+}
+
+.admin-login-subtitle {
+  color: #64748B;
+  font-size: 0.92rem;
+  margin-bottom: 1.8rem;
+}
+
+.login-hint-box {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  font-size: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.btn-voltar-login {
+  background: transparent;
+  color: #64748B;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-voltar-login:hover {
+  color: #1E293B;
+}
+
+/* Topbar do Dashboard Admin */
+.admin-navbar {
+  background: #0F172A;
+  color: #FFFFFF;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 3px solid #F59E0B;
+}
+
+.admin-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.admin-badge-logged {
+  background: #16A34A;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.admin-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.btn-admin-site-return {
+  background: #334155;
+  color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-admin-site-return:hover {
+  background: #475569;
+}
+
+.btn-admin-logout {
+  background: #EF4444;
+  color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-admin-logout:hover {
+  background: #DC2626;
+}
+
+/* Tabs do Admin */
+.admin-main-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+.admin-tabs-nav {
+  display: flex;
+  gap: 0.6rem;
+  border-bottom: 2px solid #E2E8F0;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.admin-tab-btn {
+  background: transparent;
+  padding: 0.8rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748B;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.admin-tab-btn.active {
+  color: #1A365D;
+  border-bottom-color: #EA580C;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-admin-add {
+  background: #EA580C;
+  color: #FFFFFF;
+  padding: 0.65rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+}
+
+.btn-admin-add:hover {
+  background: #C2410C;
+}
+
+/* Tabela e Cards de Gestão */
+.admin-card-panel {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.admin-professores-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.admin-prof-row-card {
+  border: 1.5px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 1.2rem;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.admin-prof-row-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-prof-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.admin-prof-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-prof-details h4 {
+  font-size: 1.15rem;
+  color: #1E293B;
+  margin: 0;
+}
+
+.admin-prof-details p {
+  font-size: 0.85rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.admin-prof-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid #F1F5F9;
+}
+
+.btn-admin-edit {
+  flex: 1;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  padding: 0.45rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid #BFDBFE;
+}
+
+.btn-admin-edit:hover {
+  background: #DBEAFE;
+}
+
+.btn-admin-del {
+  flex: 1;
+  background: #FEF2F2;
+  color: #DC2626;
+  padding: 0.45rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid #FECACA;
+}
+
+.btn-admin-del:hover {
+  background: #FEE2E2;
+}
+
+/* Lista de Matérias Admin */
+.admin-materias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+}
+
+.admin-materia-item {
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F8FAFC;
+}
+
+.admin-materia-info h5 {
+  font-size: 1.05rem;
+  color: #1E293B;
+  margin-bottom: 0.2rem;
+}
+
+.admin-materia-info span {
+  font-size: 0.78rem;
+  color: #2563EB;
+  font-weight: 700;
+  text-transform: uppercase;
+}

@@ -2,8 +2,10 @@ package com.accor.reforcoescolar.config;
 
 import com.accor.reforcoescolar.model.Avaliacao;
 import com.accor.reforcoescolar.model.Disciplina;
+import com.accor.reforcoescolar.model.Professor;
 import com.accor.reforcoescolar.repository.AvaliacaoRepository;
 import com.accor.reforcoescolar.repository.DisciplinaRepository;
+import com.accor.reforcoescolar.repository.ProfessorRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +17,14 @@ public class DataInitializer implements CommandLineRunner {
 
     private final DisciplinaRepository disciplinaRepository;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final ProfessorRepository professorRepository;
 
-    public DataInitializer(DisciplinaRepository disciplinaRepository, AvaliacaoRepository avaliacaoRepository) {
+    public DataInitializer(DisciplinaRepository disciplinaRepository,
+                           AvaliacaoRepository avaliacaoRepository,
+                           ProfessorRepository professorRepository) {
         this.disciplinaRepository = disciplinaRepository;
         this.avaliacaoRepository = avaliacaoRepository;
+        this.professorRepository = professorRepository;
     }
 
     @Override
@@ -84,6 +90,43 @@ public class DataInitializer implements CommandLineRunner {
             );
             avaliacaoRepository.saveAll(avaliacoes);
             System.out.println("Avaliações cadastradas no banco SQLite com sucesso!");
+        }
+
+        if (professorRepository.count() == 0) {
+            List<Professor> professores = Arrays.asList(
+                new Professor(
+                    "Professora Alessandra",
+                    "Linguagens & Ensino Fundamental 2",
+                    "Linguagens & Fundamental 2",
+                    "/professora.jpg",
+                    "Formada pela UFPE, a professora Alessandra atua com foco em Linguagens e no acompanhamento pedagógico completo de todas as disciplinas do Ensino Fundamental 2, auxiliando nas tarefas diárias, superação de bloqueios e base sólida com didática afetiva.",
+                    "Especialista UFPE",
+                    "Linguagens, Fund. 2 (Todas as Matérias), Português, Redação",
+                    "Acompanhamento de todas as matérias do Fundamental 2, Especialista em Linguagens, Aulas 1:1 em Aldeia"
+                ),
+                new Professor(
+                    "Eduardo",
+                    "Professor de Exatas",
+                    "Ciências Exatas",
+                    "",
+                    "Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.",
+                    "Exatas & Vestibulares",
+                    "Matemática, Física, Química, SSA & ENEM",
+                    "Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio e SSA, Recuperação rápida de base"
+                ),
+                new Professor(
+                    "Gabriell",
+                    "Professor de Computação & Lógica",
+                    "Computação & Tecnologia",
+                    "",
+                    "Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.",
+                    "Computação & Lógica",
+                    "Lógica de Programação, Algoritmos, Pensamento Computacional, Python & Web",
+                    "Aulas práticas construindo programas e algoritmos, Raciocínio lógico estruturado, Mentoria individual em tecnologia"
+                )
+            );
+            professorRepository.saveAll(professores);
+            System.out.println("Professores cadastrados no banco SQLite com sucesso!");
         }
     }
 }

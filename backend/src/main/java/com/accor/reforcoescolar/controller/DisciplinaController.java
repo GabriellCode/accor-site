@@ -28,4 +28,13 @@ public class DisciplinaController {
         Disciplina salva = disciplinaRepository.save(disciplina);
         return ResponseEntity.ok(salva);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        if (!disciplinaRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        disciplinaRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

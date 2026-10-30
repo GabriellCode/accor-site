@@ -28,6 +28,13 @@ import {
   Code,
   Cpu,
   Terminal,
+  Lock,
+  Edit,
+  Trash2,
+  Plus,
+  LogOut,
+  ArrowLeft,
+  Settings,
   X
 } from 'lucide-react'
 import './App.css'
@@ -97,12 +104,81 @@ const DEFAULT_AVALIACOES = [
   }
 ]
 
+// Professores padrão
+const DEFAULT_PROFESSORES = [
+  {
+    id: 1,
+    nome: "Professora Alessandra",
+    cargo: "Linguagens & Ensino Fundamental 2",
+    area: "Linguagens & Fundamental 2",
+    foto: "/professora.jpg",
+    bio: "Formada pela UFPE, a professora Alessandra atua com foco em Linguagens e no acompanhamento pedagógico completo de todas as disciplinas do Ensino Fundamental 2, auxiliando nas tarefas diárias, superação de bloqueios e base sólida com didática afetiva.",
+    badge: "Especialista UFPE",
+    especialidades: "Linguagens, Fund. 2 (Todas as Matérias), Português, Redação",
+    destaques: "Acompanhamento de todas as matérias do Fundamental 2, Especialista em Linguagens, Aulas 1:1 no domicílio em Aldeia"
+  },
+  {
+    id: 2,
+    nome: "Eduardo",
+    cargo: "Professor de Exatas",
+    area: "Ciências Exatas",
+    foto: "",
+    bio: "Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.",
+    badge: "Exatas & Vestibulares",
+    especialidades: "Matemática, Física, Química, SSA & ENEM",
+    destaques: "Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio e SSA, Recuperação rápida de base"
+  },
+  {
+    id: 3,
+    nome: "Gabriell",
+    cargo: "Professor de Computação & Lógica",
+    area: "Computação & Tecnologia",
+    foto: "",
+    bio: "Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.",
+    badge: "Computação & Lógica",
+    especialidades: "Lógica de Programação, Algoritmos, Pensamento Computacional, Python & Web",
+    destaques: "Aulas práticas construindo programas e algoritmos, Raciocínio lógico estruturado, Mentoria individual em tecnologia"
+  }
+]
+
 function App() {
+  // Controle de Navegação entre Site Público e Área de Admin
+  const [telaAtual, setTelaAtual] = useState('site')
+  const [adminAutenticado, setAdminAutenticado] = useState(() => {
+    return localStorage.getItem('accor_admin_auth') === 'true'
+  })
+  const [loginCredenciais, setLoginCredenciais] = useState({ username: '', password: '' })
+  const [loginErro, setLoginErro] = useState('')
+  const [adminTab, setAdminTab] = useState('professores')
+
   const [disciplinas, setDisciplinas] = useState(DEFAULT_DISCIPLINAS)
+  const [professores, setProfessores] = useState(DEFAULT_PROFESSORES)
   const [filtroCategoria, setFiltroCategoria] = useState('TODAS')
   const [solicitacoes, setSolicitacoes] = useState([])
   const [modalAdminAberto, setModalAdminAberto] = useState(false)
   const [carregandoAdmin, setCarregandoAdmin] = useState(false)
+
+  // Modais de Criação/Edição no Admin
+  const [modalProfAberto, setModalProfAberto] = useState(false)
+  const [editandoProfId, setEditandoProfId] = useState(null)
+  const [profForm, setProfForm] = useState({
+    nome: '',
+    cargo: '',
+    area: '',
+    foto: '',
+    bio: '',
+    badge: '',
+    especialidades: '',
+    destaques: ''
+  })
+
+  const [modalMateriaAberto, setModalMateriaAberto] = useState(false)
+  const [materiaForm, setMateriaForm] = useState({
+    nome: '',
+    categoria: 'Exatas',
+    descricao: '',
+    icone: 'calculator'
+  })
 
   // Estados das avaliações e do carrossel com Motion Blur
   const [avaliacoes, setAvaliacoes] = useState(DEFAULT_AVALIACOES)
@@ -273,6 +349,172 @@ function App() {
       })
   }
 
+  // Carrega os professores do backend SQLite
+  const carregarProfessores = () => {
+    fetch(`${API_BASE_URL}/professores`)
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao carregar professores")
+        return res.json()
+      })
+      .then(data => {
+        if (data && data.length > 0) {
+          setProfessores(data)
+        }
+      })
+      .catch(() => {
+        // Mantém os professores locais se o backend estiver iniciando
+      })
+  }
+
+  useEffect(() => {
+    carregarProfessores()
+  }, [])
+
+  // Autenticação do Administrador
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setLoginErro('')
+
+    const u = loginCredenciais.username.trim()
+    const p = loginCredenciais.password.trim()
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      })
+
+      if (res.ok) {
+        localStorage.setItem('accor_admin_auth', 'true')
+        setAdminAutenticado(true)
+        setLoginCredenciais({ username: '', password: '' })
+        carregarProfessores()
+        carregarSolicitacoes()
+      } else {
+        throw new Error("Credenciais inválidas")
+      }
+    } catch {
+      // Fallback de contingência local
+      if (u.toLowerCase() === 'admin' && (p === 'admin' || p === 'accor123')) {
+        localStorage.setItem('accor_admin_auth', 'true')
+        setAdminAutenticado(true)
+        setLoginCredenciais({ username: '', password: '' })
+      } else {
+        setLoginErro('Usuário ou senha incorretos. Dica: admin / accor123')
+      }
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('accor_admin_auth')
+    setAdminAutenticado(false)
+    setTelaAtual('site')
+  }
+
+  // Gerenciamento de Professores no Admin
+  const abrirModalNovoProf = () => {
+    setEditandoProfId(null)
+    setProfForm({
+      nome: '',
+      cargo: '',
+      area: '',
+      foto: '',
+      bio: '',
+      badge: '',
+      especialidades: '',
+      destaques: ''
+    })
+    setModalProfAberto(true)
+  }
+
+  const abrirModalEditarProf = (prof) => {
+    setEditandoProfId(prof.id)
+    setProfForm({
+      nome: prof.nome || '',
+      cargo: prof.cargo || '',
+      area: prof.area || '',
+      foto: prof.foto || '',
+      bio: prof.bio || '',
+      badge: prof.badge || '',
+      especialidades: prof.especialidades || '',
+      destaques: prof.destaques || ''
+    })
+    setModalProfAberto(true)
+  }
+
+  const salvarProfessor = async (e) => {
+    e.preventDefault()
+    try {
+      const url = editandoProfId 
+        ? `${API_BASE_URL}/professores/${editandoProfId}` 
+        : `${API_BASE_URL}/professores`
+      const method = editandoProfId ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profForm)
+      })
+
+      if (res.ok) {
+        const salvo = await res.json()
+        if (editandoProfId) {
+          setProfessores(professores.map(p => p.id === editandoProfId ? salvo : p))
+        } else {
+          setProfessores([...professores, salvo])
+        }
+      }
+    } catch {
+      if (editandoProfId) {
+        setProfessores(professores.map(p => p.id === editandoProfId ? { ...p, ...profForm } : p))
+      } else {
+        setProfessores([...professores, { id: Date.now(), ...profForm }])
+      }
+    }
+    setModalProfAberto(false)
+  }
+
+  const excluirProfessor = async (id) => {
+    if (!window.confirm("Deseja realmente excluir este professor?")) return
+    try {
+      await fetch(`${API_BASE_URL}/professores/${id}`, { method: 'DELETE' })
+    } catch (err) {
+      console.log(err)
+    }
+    setProfessores(professores.filter(p => p.id !== id))
+  }
+
+  // Gerenciamento de Disciplinas no Admin
+  const salvarMateria = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await fetch(`${API_BASE_URL}/disciplinas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(materiaForm)
+      })
+      if (res.ok) {
+        const salva = await res.json()
+        setDisciplinas([...disciplinas, salva])
+      }
+    } catch {
+      setDisciplinas([...disciplinas, { id: Date.now(), ...materiaForm }])
+    }
+    setModalMateriaAberto(false)
+    setMateriaForm({ nome: '', categoria: 'Exatas', descricao: '', icone: 'calculator' })
+  }
+
+  const excluirMateria = async (id) => {
+    if (!window.confirm("Deseja realmente remover esta disciplina?")) return
+    try {
+      await fetch(`${API_BASE_URL}/disciplinas/${id}`, { method: 'DELETE' })
+    } catch (err) {
+      console.log(err)
+    }
+    setDisciplinas(disciplinas.filter(d => d.id !== id))
+  }
+
   // Carrega as avaliações salvas no backend Spring Boot + SQLite
   useEffect(() => {
     fetch(`${API_BASE_URL}/avaliacoes`)
@@ -402,6 +644,469 @@ function App() {
 
   const whatsappLink = "https://wa.me/5581991225450?text=Ol%C3%A1!%20Vi%20a%20apresenta%C3%A7%C3%A3o%20do%20refor%C3%A7o%20escolar%20ACCOR%20e%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es."
 
+  // Se o usuário navegou para a Área do Administrador
+  if (telaAtual === 'admin') {
+    if (!adminAutenticado) {
+      return (
+        <div className="admin-login-wrapper">
+          <div className="admin-login-card">
+            <div className="login-lock-icon-wrap">
+              <Lock size={32} />
+            </div>
+            <h2 className="admin-login-title">Área do Administrador</h2>
+            <p className="admin-login-subtitle">Acesso restrito para gestão do reforço escolar ACCOR</p>
+
+            {loginErro && (
+              <div className="form-status-alert error" style={{ marginBottom: '1rem', textAlign: 'left' }}>
+                {loginErro}
+              </div>
+            )}
+
+            <div className="login-hint-box">
+              🔑 <strong>Credenciais de Acesso:</strong><br />
+              Usuário: <code>admin</code> | Senha: <code>admin</code> ou <code>accor123</code>
+            </div>
+
+            <form onSubmit={handleLogin}>
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label>Usuário</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="admin" 
+                  value={loginCredenciais.username}
+                  onChange={(e) => setLoginCredenciais({ ...loginCredenciais, username: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ textAlign: 'left' }}>
+                <label>Senha</label>
+                <input 
+                  type="password" 
+                  className="form-input" 
+                  placeholder="••••••••" 
+                  value={loginCredenciais.password}
+                  onChange={(e) => setLoginCredenciais({ ...loginCredenciais, password: e.target.value })}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn-submit-form" style={{ width: '100%', marginTop: '0.8rem' }}>
+                <Lock size={16} /> Entrar no Painel Admin
+              </button>
+            </form>
+
+            <button 
+              type="button" 
+              className="btn-voltar-login" 
+              onClick={() => {
+                setTelaAtual('site')
+                setLoginErro('')
+              }}
+            >
+              <ArrowLeft size={16} /> Voltar para o Site Público
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    // Tela do Dashboard Admin Completo
+    return (
+      <div className="admin-screen-container">
+        {/* Topbar Admin */}
+        <header className="admin-navbar">
+          <div className="admin-nav-brand">
+            <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>✏️ ACCOR REFORÇO</span>
+            <span className="admin-badge-logged">PAINEL ADMINISTRATIVO</span>
+          </div>
+
+          <div className="admin-nav-actions">
+            <button 
+              className="btn-admin-site-return" 
+              onClick={() => setTelaAtual('site')}
+              title="Voltar ao site público"
+            >
+              <ArrowLeft size={16} /> Ver Site
+            </button>
+            <button 
+              className="btn-admin-logout" 
+              onClick={handleLogout}
+              title="Encerrar sessão de admin"
+            >
+              <LogOut size={16} /> Sair
+            </button>
+          </div>
+        </header>
+
+        {/* Corpo Principal Admin */}
+        <main className="admin-main-container">
+          <div className="admin-tabs-nav">
+            <button 
+              className={`admin-tab-btn ${adminTab === 'professores' ? 'active' : ''}`}
+              onClick={() => setAdminTab('professores')}
+            >
+              <User size={18} />
+              <span>Professores ({professores.length})</span>
+            </button>
+
+            <button 
+              className={`admin-tab-btn ${adminTab === 'disciplinas' ? 'active' : ''}`}
+              onClick={() => setAdminTab('disciplinas')}
+            >
+              <BookOpen size={18} />
+              <span>Matérias & Disciplinas ({disciplinas.length})</span>
+            </button>
+
+            <button 
+              className={`admin-tab-btn ${adminTab === 'solicitacoes' ? 'active' : ''}`}
+              onClick={() => {
+                setAdminTab('solicitacoes')
+                carregarSolicitacoes()
+              }}
+            >
+              <Database size={18} />
+              <span>Solicitações SQLite ({solicitacoes.length})</span>
+            </button>
+          </div>
+
+          {/* TAB 1: GESTÃO DE PROFESSORES */}
+          {adminTab === 'professores' && (
+            <div className="admin-card-panel">
+              <div className="admin-section-header">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0F172A' }}>Corpo Docente Cadastrado</h3>
+                  <p style={{ margin: 0, color: '#64748B', fontSize: '0.9rem' }}>
+                    Adicione novos professores, edite suas fotos e funções, ou remova da equipe.
+                  </p>
+                </div>
+                <button className="btn-admin-add" onClick={abrirModalNovoProf}>
+                  <Plus size={18} />
+                  <span>Novo Professor</span>
+                </button>
+              </div>
+
+              <div className="admin-professores-list">
+                {professores.map((prof) => (
+                  <div key={prof.id} className="admin-prof-row-card">
+                    <div className="admin-prof-row-top">
+                      <div className="admin-prof-thumb">
+                        {prof.foto ? (
+                          <img src={prof.foto} alt={prof.nome} />
+                        ) : (
+                          <span>👨‍🏫</span>
+                        )}
+                      </div>
+                      <div className="admin-prof-details">
+                        <h4>{prof.nome}</h4>
+                        <p><strong>Função:</strong> {prof.cargo}</p>
+                        <p><strong>Área:</strong> {prof.area || 'Geral'}</p>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '0.82rem', color: '#64748B', lineHeight: '1.4' }}>
+                      {prof.bio ? (prof.bio.length > 110 ? prof.bio.substring(0, 110) + '...' : prof.bio) : 'Sem bio cadastrada'}
+                    </div>
+
+                    <div className="admin-prof-actions">
+                      <button 
+                        className="btn-admin-edit"
+                        onClick={() => abrirModalEditarProf(prof)}
+                      >
+                        <Edit size={15} /> Editar Função & Foto
+                      </button>
+                      <button 
+                        className="btn-admin-del"
+                        onClick={() => excluirProfessor(prof.id)}
+                      >
+                        <Trash2 size={15} /> Excluir
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: GESTÃO DE DISCIPLINAS */}
+          {adminTab === 'disciplinas' && (
+            <div className="admin-card-panel">
+              <div className="admin-section-header">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0F172A' }}>Disciplinas e Matérias</h3>
+                  <p style={{ margin: 0, color: '#64748B', fontSize: '0.9rem' }}>
+                    Gerencie a grade curricular e matérias oferecidas aos estudantes.
+                  </p>
+                </div>
+                <button className="btn-admin-add" onClick={() => setModalMateriaAberto(true)}>
+                  <Plus size={18} />
+                  <span>Nova Matéria</span>
+                </button>
+              </div>
+
+              <div className="admin-materias-grid">
+                {disciplinas.map((disc) => (
+                  <div key={disc.id || disc.nome} className="admin-materia-item">
+                    <div className="admin-materia-info">
+                      <h5>{disc.nome}</h5>
+                      <span>{disc.categoria}</span>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#64748B' }}>
+                        {disc.descricao}
+                      </p>
+                    </div>
+                    <button 
+                      className="btn-admin-del"
+                      style={{ flex: 'initial', padding: '0.4rem 0.6rem' }}
+                      onClick={() => excluirMateria(disc.id)}
+                      title="Excluir Matéria"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: SOLICITAÇÕES SQLITE */}
+          {adminTab === 'solicitacoes' && (
+            <div className="admin-card-panel">
+              <div className="admin-section-header">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0F172A' }}>Contatos Salvos no SQLite</h3>
+                  <p style={{ margin: 0, color: '#64748B', fontSize: '0.9rem' }}>
+                    Leads e pedidos de aula enviados através do formulário do site.
+                  </p>
+                </div>
+                <button 
+                  className="btn-admin-add" 
+                  style={{ background: '#2563EB' }}
+                  onClick={carregarSolicitacoes}
+                >
+                  <Database size={16} />
+                  <span>Atualizar Registros</span>
+                </button>
+              </div>
+
+              {solicitacoes.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2.5rem', color: '#64748B' }}>
+                  <Database size={44} style={{ opacity: 0.4, marginBottom: '0.8rem' }} />
+                  <p>Nenhuma solicitação gravada ainda ou banco de dados iniciando.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {solicitacoes.map((item) => (
+                    <div key={item.id} className="solicitacao-item">
+                      <div className="solicitacao-header">
+                        <span className="solicitacao-nome">
+                          <User size={16} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                          {item.nomeResponsavel} {item.nomeAluno ? `(Aluno: ${item.nomeAluno})` : ''}
+                        </span>
+                        <span className="solicitacao-status">{item.status || 'NOVO'}</span>
+                      </div>
+                      <div className="solicitacao-details">
+                        <div><strong>Telefone:</strong> {item.telefone}</div>
+                        <div><strong>Disciplina:</strong> {item.disciplinaInteresse || 'Geral'}</div>
+                        <div><strong>Série:</strong> {item.serieEscolar || 'Não informada'}</div>
+                        <div><strong>Modalidade:</strong> {item.modalidade || 'Aldeia'}</div>
+                      </div>
+                      {item.mensagem && (
+                        <div className="solicitacao-msg">
+                          "{item.mensagem}"
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* Modal de Professor (Criar ou Editar) */}
+        {modalProfAberto && (
+          <div className="modal-overlay" onClick={() => setModalProfAberto(false)}>
+            <div className="modal-review-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+              <div className="modal-header" style={{ background: 'transparent', padding: '0 0 1rem 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <User size={20} color="#EA580C" />
+                  <h3 style={{ margin: 0, fontSize: '1.3rem' }}>
+                    {editandoProfId ? "Editar Professor" : "Cadastrar Novo Professor"}
+                  </h3>
+                </div>
+                <button onClick={() => setModalProfAberto(false)} style={{ background: 'transparent', padding: '0.3rem' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={salvarProfessor}>
+                <div className="form-group">
+                  <label>Nome do Professor *</label>
+                  <input 
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Professora Alessandra"
+                    value={profForm.nome}
+                    onChange={(e) => setProfForm({ ...profForm, nome: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Função / Cargo *</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: Linguagens & Ensino Fundamental 2"
+                      value={profForm.cargo}
+                      onChange={(e) => setProfForm({ ...profForm, cargo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Área de Atuação</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: Linguagens, Exatas, Computação"
+                      value={profForm.area}
+                      onChange={(e) => setProfForm({ ...profForm, area: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Foto (Caminho ou URL)</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: /professora.jpg ou https://..."
+                      value={profForm.foto}
+                      onChange={(e) => setProfForm({ ...profForm, foto: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Selo / Destaque</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="Ex: Especialista UFPE"
+                      value={profForm.badge}
+                      onChange={(e) => setProfForm({ ...profForm, badge: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Especialidades (separadas por vírgula)</label>
+                  <input 
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Português, Redação, Fund. 2"
+                    value={profForm.especialidades}
+                    onChange={(e) => setProfForm({ ...profForm, especialidades: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Pontos Fortes / Destaques (separados por vírgula)</label>
+                  <input 
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Acompanhamento de todas as matérias, Aulas 1:1"
+                    value={profForm.destaques}
+                    onChange={(e) => setProfForm({ ...profForm, destaques: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Biografia Pedagógica</label>
+                  <textarea 
+                    className="form-textarea"
+                    rows="3"
+                    placeholder="Descrição da metodologia, formação e experiência..."
+                    value={profForm.bio}
+                    onChange={(e) => setProfForm({ ...profForm, bio: e.target.value })}
+                  />
+                </div>
+
+                <button type="submit" className="btn-submit-form" style={{ width: '100%', marginTop: '0.8rem' }}>
+                  <CheckCircle2 size={18} />
+                  <span>{editandoProfId ? "Salvar Alterações do Professor" : "Cadastrar Professor"}</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Nova Matéria / Disciplina */}
+        {modalMateriaAberto && (
+          <div className="modal-overlay" onClick={() => setModalMateriaAberto(false)}>
+            <div className="modal-review-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+              <div className="modal-header" style={{ background: 'transparent', padding: '0 0 1rem 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <BookOpen size={20} color="#EA580C" />
+                  <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Adicionar Disciplina</h3>
+                </div>
+                <button onClick={() => setModalMateriaAberto(false)} style={{ background: 'transparent', padding: '0.3rem' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={salvarMateria}>
+                <div className="form-group">
+                  <label>Nome da Disciplina *</label>
+                  <input 
+                    type="text"
+                    className="form-input"
+                    placeholder="Ex: Robótica Educacional"
+                    value={materiaForm.nome}
+                    onChange={(e) => setMateriaForm({ ...materiaForm, nome: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Categoria</label>
+                  <select 
+                    className="form-select"
+                    value={materiaForm.categoria}
+                    onChange={(e) => setMateriaForm({ ...materiaForm, categoria: e.target.value })}
+                  >
+                    <option value="Exatas">Exatas</option>
+                    <option value="Linguagens">Linguagens</option>
+                    <option value="Humanas">Humanas</option>
+                    <option value="Biológicas">Biológicas</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Descrição Breve</label>
+                  <textarea 
+                    className="form-textarea"
+                    rows="2"
+                    placeholder="Ex: Introdução à programação em blocos e lógica..."
+                    value={materiaForm.descricao}
+                    onChange={(e) => setMateriaForm({ ...materiaForm, descricao: e.target.value })}
+                  />
+                </div>
+
+                <button type="submit" className="btn-submit-form" style={{ width: '100%', marginTop: '0.8rem' }}>
+                  <Plus size={18} />
+                  <span>Salvar Disciplina</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="app-container">
       {/* Sensor invisível no topo da janela: quando o mouse passa no topo, faz o navbar reaparecer */}
@@ -446,14 +1151,11 @@ function App() {
             <div className="header-actions">
               <button 
                 className="btn-header-admin" 
-                onClick={() => {
-                  setModalAdminAberto(true)
-                  carregarSolicitacoes()
-                }}
-                title="Ver contatos salvos no banco SQLite"
+                onClick={() => setTelaAtual('admin')}
+                title="Acessar Área Administrativa (Login & Senha)"
               >
-                <Database size={16} />
-                <span>Painel SQLite</span>
+                <Lock size={15} />
+                <span>Área Admin</span>
               </button>
 
               <a 
@@ -547,120 +1249,78 @@ function App() {
           </p>
         </div>
 
-        {/* Grade com os Professores da Equipe ACCOR */}
+        {/* Grade com os Professores da Equipe ACCOR - Dinâmico integrado ao SQLite/Admin */}
         <div className="professores-grid">
-          {/* Card 1: Professora Alessandra */}
-          <div className="professor-card-item">
-            <div className="prof-top-bar" style={{ backgroundColor: '#DC2626' }} />
-            <div className="prof-header-box">
-              <div className="prof-avatar-wrap">
-                <img 
-                  src="/professora.jpg" 
-                  alt="Professora Alessandra" 
-                  decoding="async"
-                  loading="lazy"
-                />
-              </div>
-              <span className="prof-badge-tag" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
-                <GraduationCap size={14} /> Especialista UFPE
-              </span>
-              <h3 className="prof-name-title">Professora Alessandra</h3>
-              <p className="prof-role-subtitle">Linguagens & Ensino Fundamental 2</p>
+          {professores.map((prof, index) => {
+            const cores = ['#DC2626', '#2563EB', '#0D9488', '#EA580C', '#7C3AED']
+            const cor = cores[index % cores.length]
+            const destaquesArray = prof.destaques ? (Array.isArray(prof.destaques) ? prof.destaques : prof.destaques.split(',')) : []
+            const specsArray = prof.especialidades ? (Array.isArray(prof.especialidades) ? prof.especialidades : prof.especialidades.split(',')) : []
 
-              <div className="prof-specialties-tags">
-                <span className="prof-spec-pill">Linguagens</span>
-                <span className="prof-spec-pill">Fund. 2 (Todas as Matérias)</span>
-                <span className="prof-spec-pill">Português</span>
-                <span className="prof-spec-pill">Redação</span>
-              </div>
-            </div>
+            return (
+              <div key={prof.id || prof.nome} className="professor-card-item">
+                <div className="prof-top-bar" style={{ backgroundColor: cor }} />
+                <div className="prof-header-box">
+                  <div className="prof-avatar-wrap" style={{ background: prof.foto ? 'transparent' : `${cor}15`, color: cor }}>
+                    {prof.foto ? (
+                      <img 
+                        src={prof.foto} 
+                        alt={prof.nome} 
+                        decoding="async"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center' }}>
+                        {prof.area?.toLowerCase().includes('exatas') ? (
+                          <Calculator size={52} color={cor} />
+                        ) : prof.area?.toLowerCase().includes('computação') || prof.area?.toLowerCase().includes('lógica') ? (
+                          <Code size={52} color={cor} />
+                        ) : (
+                          <GraduationCap size={52} color={cor} />
+                        )}
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, marginTop: '4px', color: cor }}>
+                          {prof.area?.toUpperCase() || "DOCENTE"}
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-            <div className="prof-body-box">
-              <p className="prof-bio-text">
-                Formada pela <strong>UFPE</strong>, a professora Alessandra atua com foco em Linguagens e no acompanhamento pedagógico completo de <strong>todas as disciplinas do Ensino Fundamental 2</strong>, auxiliando nas tarefas diárias, superação de bloqueios e base sólida com didática afetiva.
-              </p>
+                  <span className="prof-badge-tag" style={{ backgroundColor: `${cor}20`, color: cor }}>
+                    <Sparkles size={14} /> {prof.badge || "Especialista UFPE"}
+                  </span>
+                  <h3 className="prof-name-title">{prof.nome}</h3>
+                  <p className="prof-role-subtitle">{prof.cargo}</p>
 
-              <ul className="prof-features-list">
-                <li><CheckCircle2 size={16} color="#16A34A" /> Acompanhamento de todas as matérias do Fundamental 2</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Especialista em Linguagens, interpretação e redação</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas 1:1 no domicílio em Aldeia com acolhimento</li>
-              </ul>
-            </div>
-          </div>
+                  {specsArray.length > 0 && (
+                    <div className="prof-specialties-tags">
+                      {specsArray.map((spec, sIdx) => (
+                        <span key={sIdx} className="prof-spec-pill">
+                          {spec.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-          {/* Card 2: Eduardo (Professor de Exatas) */}
-          <div className="professor-card-item">
-            <div className="prof-top-bar" style={{ backgroundColor: '#2563EB' }} />
-            <div className="prof-header-box">
-              <div className="prof-avatar-wrap" style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', color: '#2563EB' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <Calculator size={56} color="#2563EB" />
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, marginTop: '4px', color: '#1D4ED8' }}>EXATAS</div>
+                <div className="prof-body-box">
+                  <p className="prof-bio-text">
+                    {prof.bio}
+                  </p>
+
+                  {destaquesArray.length > 0 && (
+                    <ul className="prof-features-list">
+                      {destaquesArray.map((item, dIdx) => (
+                        <li key={dIdx}>
+                          <CheckCircle2 size={16} color="#16A34A" /> {item.trim()}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {/* Sem botões nos cards: conforme solicitado, o único contato é o do final da página */}
                 </div>
               </div>
-              <span className="prof-badge-tag" style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>
-                <Calculator size={14} /> Exatas & Vestibulares
-              </span>
-              <h3 className="prof-name-title">Eduardo</h3>
-              <p className="prof-role-subtitle">Professor de Exatas</p>
-
-              <div className="prof-specialties-tags">
-                <span className="prof-spec-pill">Matemática</span>
-                <span className="prof-spec-pill">Física</span>
-                <span className="prof-spec-pill">Química</span>
-                <span className="prof-spec-pill">SSA & ENEM</span>
-              </div>
-            </div>
-
-            <div className="prof-body-box">
-              <p className="prof-bio-text">
-                Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.
-              </p>
-
-              <ul className="prof-features-list">
-                <li><CheckCircle2 size={16} color="#16A34A" /> Resolução passo a passo de listas de exercícios</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Foco intensivo para provas do colégio, SSA e ENEM</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Recuperação rápida de base e autoconfiança</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Card 3: Gabriell (Professor de Computação e Lógica de Programação) */}
-          <div className="professor-card-item">
-            <div className="prof-top-bar" style={{ backgroundColor: '#0D9488' }} />
-            <div className="prof-header-box">
-              <div className="prof-avatar-wrap" style={{ background: 'linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%)', color: '#0F766E' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <Code size={56} color="#0D9488" />
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, marginTop: '4px', color: '#0F766E' }}>DEV & LÓGICA</div>
-                </div>
-              </div>
-              <span className="prof-badge-tag" style={{ backgroundColor: '#CCFBF1', color: '#0F766E' }}>
-                <Terminal size={14} /> Computação & Lógica
-              </span>
-              <h3 className="prof-name-title">Gabriell</h3>
-              <p className="prof-role-subtitle">Professor de Computação & Lógica</p>
-
-              <div className="prof-specialties-tags">
-                <span className="prof-spec-pill">Lógica de Programação</span>
-                <span className="prof-spec-pill">Algoritmos</span>
-                <span className="prof-spec-pill">Pensamento Computacional</span>
-                <span className="prof-spec-pill">Python & Web</span>
-              </div>
-            </div>
-
-            <div className="prof-body-box">
-              <p className="prof-bio-text">
-                Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.
-              </p>
-
-              <ul className="prof-features-list">
-                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas práticas construindo programas e algoritmos</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Raciocínio lógico estruturado aplicável a todas as áreas</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Mentoria individual e introdução ao mercado de tech</li>
-              </ul>
-            </div>
-          </div>
+            )
+          })}
         </div>
       </section>
 
