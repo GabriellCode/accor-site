@@ -1377,3 +1377,163 @@
   perspective: 1000px;
   transform-origin: center top;
 }
+
+/* =========================================
+   SEÇÃO DE PROFESSORES (EQUIPE MULTIDISCIPLINAR)
+========================================= */
+
+.professores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.professor-card-item {
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 2px solid #E2D9C8;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.professor-card-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.09);
+  border-color: #CBD5E1;
+}
+
+.prof-top-bar {
+  height: 8px;
+  width: 100%;
+}
+
+.prof-header-box {
+  padding: 1.8rem 1.8rem 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.prof-avatar-wrap {
+  width: 130px;
+  height: 155px;
+  margin: 0 auto 1rem;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 4px solid #FFFFFF;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  background: #F8FAFC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prof-avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.prof-avatar-icon-large {
+  font-size: 3.5rem;
+}
+
+.prof-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prof-name-title {
+  font-size: 1.6rem;
+  color: #1E293B;
+  margin-bottom: 0.2rem;
+}
+
+.prof-role-subtitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #64748B;
+  margin-bottom: 0.8rem;
+}
+
+.prof-specialties-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.prof-spec-pill {
+  background: #F1F5F9;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.prof-body-box {
+  padding: 0 1.8rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.prof-bio-text {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+}
+
+.prof-features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.prof-features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #1E293B;
+  font-weight: 600;
+}
+
+.btn-contact-prof {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #FFFFFF;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-contact-prof:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}

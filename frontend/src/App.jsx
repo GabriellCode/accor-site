@@ -25,6 +25,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Quote,
+  Code,
+  Cpu,
+  Terminal,
   X
 } from 'lucide-react'
 import './App.css'
@@ -41,7 +44,8 @@ const DEFAULT_DISCIPLINAS = [
   { id: 5, nome: "Química", categoria: "Exatas", descricao: "Química geral, tabela periódica, transformações químicas e orgânica.", icone: "flask-conical", cor: "#0D9488" },
   { id: 6, nome: "Biologia", categoria: "Ciências", descricao: "Citologia, genética, botânica, zoologia, ecologia e corpo humano.", icone: "dna", cor: "#16A34A" },
   { id: 7, nome: "História", categoria: "Humanas", descricao: "História do Brasil e Geral, linha do tempo e desenvolvimento de análise crítica.", icone: "landmark", cor: "#D97706" },
-  { id: 8, nome: "Geografia", categoria: "Humanas", descricao: "Cartografia, geopolítica, meio ambiente, climatologia e sociedade.", icone: "globe", cor: "#0284C7" }
+  { id: 8, nome: "Geografia", categoria: "Humanas", descricao: "Cartografia, geopolítica, meio ambiente, climatologia e sociedade.", icone: "globe", cor: "#0284C7" },
+  { id: 9, nome: "Computação & Lógica", categoria: "Tecnologia", descricao: "Lógica de programação, algoritmos, raciocínio computacional e projetos práticos com Prof. Gabriell.", icone: "code", cor: "#0D9488" }
 ]
 
 // Dados padrão de avaliações para o carrossel interativo
@@ -344,6 +348,9 @@ function App() {
       case 'biologia': return <Dna size={26} />
       case 'história': return <Landmark size={26} />
       case 'geografia': return <Globe size={26} />
+      case 'computação & lógica':
+      case 'lógica de programação':
+      case 'computação': return <Code size={26} />
       default: return <Sparkles size={26} />
     }
   }
@@ -429,7 +436,7 @@ function App() {
             </div>
 
             <nav className="header-nav">
-              <a href="#sobre" className="header-nav-link">A Professora</a>
+              <a href="#professores" className="header-nav-link">Professores</a>
               <a href="#disciplinas" className="header-nav-link">Disciplinas</a>
               <a href="#metodologia" className="header-nav-link">Diferenciais</a>
               <a href="#avaliacoes" className="header-nav-link">Avaliações</a>
@@ -530,99 +537,161 @@ function App() {
         </div>
       </section>
 
-      {/* Seção de Apresentação da Professora */}
-      <section id="sobre" className="section-wrapper">
+      {/* Seção de Apresentação dos Professores */}
+      <section id="professores" className="section-wrapper">
         <div className="section-header">
-          <span className="section-tag">Acolhimento & Experiência Pedagógica</span>
-          <h2 className="section-title">Conheça a Professora</h2>
+          <span className="section-tag">Corpo Docente Especializado UFPE</span>
+          <h2 className="section-title">Nossos Professores</h2>
           <p className="section-desc">
-            Compromisso com o aprendizado individualizado, respeito ao tempo de cada aluno e formação pela Universidade Federal de Pernambuco.
+            Aulas individuais no domicílio em Aldeia com profissionais dedicados a cada área do conhecimento.
           </p>
         </div>
 
-        <div className="teacher-profile-wrapper">
-          <div className="teacher-grid">
-            {/* Cartão Visual da Professora com Foto Real */}
-            <div className="teacher-card-visual">
-              <div className="teacher-photo-container">
+        {/* Grade com os Professores da Equipe ACCOR */}
+        <div className="professores-grid">
+          {/* Card 1: Professora Responsável */}
+          <div className="professor-card-item">
+            <div className="prof-top-bar" style={{ backgroundColor: '#DC2626' }} />
+            <div className="prof-header-box">
+              <div className="prof-avatar-wrap">
                 <img 
                   src="/professora.jpg" 
-                  alt="Professora do ACCOR Reforço Escolar" 
-                  className="teacher-photo-img" 
+                  alt="Professora Responsável" 
                   decoding="async"
                   loading="lazy"
                 />
-                <span className="teacher-photo-badge">
-                  <GraduationCap size={14} /> Especialista UFPE
-                </span>
               </div>
-              <h4 className="teacher-card-name">Professora Responsável</h4>
-              <p className="teacher-card-role">ACCOR Reforço Escolar • Aldeia</p>
+              <span className="prof-badge-tag" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                <GraduationCap size={14} /> Especialista UFPE
+              </span>
+              <h3 className="prof-name-title">Professora Responsável</h3>
+              <p className="prof-role-subtitle">Coordenadora & Tutora de Reforço</p>
 
-              <div className="teacher-card-pills">
-                <div className="teacher-pill-item">
-                  <MapPin size={15} color="#2563EB" /> Atendimento em domicílio em Aldeia
-                </div>
-                <div className="teacher-pill-item">
-                  <Award size={15} color="#D97706" /> Formada pela UFPE
-                </div>
-                <div className="teacher-pill-item">
-                  <Heart size={15} color="#DC2626" /> Metodologia Afetiva & Ativa
-                </div>
+              <div className="prof-specialties-tags">
+                <span className="prof-spec-pill">Português</span>
+                <span className="prof-spec-pill">Redação</span>
+                <span className="prof-spec-pill">Inglês</span>
+                <span className="prof-spec-pill">Humanas</span>
               </div>
             </div>
 
-            {/* Conteúdo e Filosofia de Ensino */}
-            <div className="teacher-info-content">
-              <h3>"Aprender com afeto e método devolve a confiança ao estudante."</h3>
-              <p className="teacher-intro-lead">
-                Educação personalizada que respeita o ritmo e potencializa os pontos fortes do seu filho.
-              </p>
-              <p className="teacher-bio-text">
-                Com base acadêmica sólida pela <strong>Universidade Federal de Pernambuco (UFPE)</strong>, dedico-me a auxiliar estudantes do Ensino Fundamental e Médio a superarem bloqueios, recuperarem o rendimento escolar e desenvolverem gosto genuíno pelo estudo.
-              </p>
-              <p className="teacher-bio-text">
-                Sabemos que a rotina escolar coletiva muitas vezes deixa dúvidas para trás. O trabalho do <strong>ACCOR Reforço Escolar</strong> é levar o ensino de alto padrão até a sua casa em Aldeia, criando um espaço acolhedor, sem pressões desnecessárias, focado em resultados reais.
+            <div className="prof-body-box">
+              <p className="prof-bio-text">
+                Formada pela <strong>UFPE</strong>, com foco em alfabetização, hábitos de estudo, superação de bloqueios e acompanhamento diário de tarefas escolares para Fundamental e Médio com didática afetiva.
               </p>
 
-              <div className="teacher-quote-box">
-                “Cada aluno tem sua própria maneira de compreender o mundo. Nosso papel não é apenas passar a resposta correta, mas desenvolver o raciocínio, a segurança e a autonomia.”
-              </div>
+              <ul className="prof-features-list">
+                <li><CheckCircle2 size={16} color="#16A34A" /> Metodologia afetiva e acolhedora</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas 1:1 no domicílio em Aldeia</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Relatórios de evolução periódicos para os pais</li>
+              </ul>
 
-              <div className="teacher-credentials-grid">
-                <div className="teacher-cred-item">
-                  <CheckCircle2 size={18} color="#16A34A" />
-                  <span>Aulas 100% individuais e sob medida</span>
-                </div>
-                <div className="teacher-cred-item">
-                  <CheckCircle2 size={18} color="#16A34A" />
-                  <span>Apoio em tarefas escolares e fixação prática</span>
-                </div>
-                <div className="teacher-cred-item">
-                  <CheckCircle2 size={18} color="#16A34A" />
-                  <span>Preparação estratégica para provas e simulados</span>
-                </div>
-                <div className="teacher-cred-item">
-                  <CheckCircle2 size={18} color="#16A34A" />
-                  <span>Relatórios periódicos de evolução para os pais</span>
-                </div>
-              </div>
+              <a 
+                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20uma%20aula%20com%20a%20Professora%20Respons%C3%A1vel." 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-contact-prof"
+                style={{ backgroundColor: '#DC2626' }}
+              >
+                <MessageCircle size={18} />
+                <span>Agendar com a Professora</span>
+              </a>
+            </div>
+          </div>
 
-              <div className="teacher-cta-actions">
-                <a 
-                  href={whatsappLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="btn-whatsapp-action"
-                >
-                  <MessageCircle size={18} />
-                  Falar com a Professora no WhatsApp
-                </a>
-                <a href="#contato" className="btn-primary-action">
-                  <Calendar size={18} />
-                  Solicitar Agendamento
-                </a>
+          {/* Card 2: Eduardo (Professor de Exatas) */}
+          <div className="professor-card-item">
+            <div className="prof-top-bar" style={{ backgroundColor: '#2563EB' }} />
+            <div className="prof-header-box">
+              <div className="prof-avatar-wrap" style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', color: '#2563EB' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <Calculator size={56} color="#2563EB" />
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, marginTop: '4px', color: '#1D4ED8' }}>EXATAS</div>
+                </div>
               </div>
+              <span className="prof-badge-tag" style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>
+                <Calculator size={14} /> Exatas & Vestibulares
+              </span>
+              <h3 className="prof-name-title">Eduardo</h3>
+              <p className="prof-role-subtitle">Professor de Exatas</p>
+
+              <div className="prof-specialties-tags">
+                <span className="prof-spec-pill">Matemática</span>
+                <span className="prof-spec-pill">Física</span>
+                <span className="prof-spec-pill">Química</span>
+                <span className="prof-spec-pill">SSA & ENEM</span>
+              </div>
+            </div>
+
+            <div className="prof-body-box">
+              <p className="prof-bio-text">
+                Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, colégio e vestibulares.
+              </p>
+
+              <ul className="prof-features-list">
+                <li><CheckCircle2 size={16} color="#16A34A" /> Resolução passo a passo de listas de exercícios</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Foco intensivo para provas do colégio, SSA e ENEM</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Recuperação rápida de base e autoconfiança</li>
+              </ul>
+
+              <a 
+                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20aulas%20de%20Exatas%20com%20o%20Professor%20Eduardo." 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-contact-prof"
+                style={{ backgroundColor: '#2563EB' }}
+              >
+                <MessageCircle size={18} />
+                <span>Agendar com Prof. Eduardo</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Card 3: Gabriell (Professor de Computação e Lógica de Programação) */}
+          <div className="professor-card-item">
+            <div className="prof-top-bar" style={{ backgroundColor: '#0D9488' }} />
+            <div className="prof-header-box">
+              <div className="prof-avatar-wrap" style={{ background: 'linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%)', color: '#0F766E' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <Code size={56} color="#0D9488" />
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, marginTop: '4px', color: '#0F766E' }}>DEV & LÓGICA</div>
+                </div>
+              </div>
+              <span className="prof-badge-tag" style={{ backgroundColor: '#CCFBF1', color: '#0F766E' }}>
+                <Terminal size={14} /> Computação & Lógica
+              </span>
+              <h3 className="prof-name-title">Gabriell</h3>
+              <p className="prof-role-subtitle">Professor de Computação & Lógica</p>
+
+              <div className="prof-specialties-tags">
+                <span className="prof-spec-pill">Lógica de Programação</span>
+                <span className="prof-spec-pill">Algoritmos</span>
+                <span className="prof-spec-pill">Pensamento Computacional</span>
+                <span className="prof-spec-pill">Python & Web</span>
+              </div>
+            </div>
+
+            <div className="prof-body-box">
+              <p className="prof-bio-text">
+                Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.
+              </p>
+
+              <ul className="prof-features-list">
+                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas práticas construindo programas e algoritmos</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Raciocínio lógico estruturado aplicável a todas as áreas</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Mentoria individual e introdução ao mercado de tech</li>
+              </ul>
+
+              <a 
+                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20aulas%20de%20Computa%C3%A7%C3%A3o%20e%20L%C3%B3gica%20com%20o%20Professor%20Gabriell." 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-contact-prof"
+                style={{ backgroundColor: '#0D9488' }}
+              >
+                <MessageCircle size={18} />
+                <span>Agendar com Prof. Gabriell</span>
+              </a>
             </div>
           </div>
         </div>

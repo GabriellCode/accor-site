@@ -16,6 +16,7 @@ public class EscolaInfoDTO {
     private String bioProfessora;
     private String filosofiaEnsino;
     private List<String> destaquesProfessora;
+    private List<ProfessorDTO> professores;
 
     public EscolaInfoDTO() {
     }
@@ -24,7 +25,7 @@ public class EscolaInfoDTO {
                          String slogan, String descricaoMetodo, String whatsapp,
                          String whatsappDisplay, List<String> disciplinas,
                          String nomeProfessora, String bioProfessora, String filosofiaEnsino,
-                         List<String> destaquesProfessora) {
+                         List<String> destaquesProfessora, List<ProfessorDTO> professores) {
         this.nome = nome;
         this.subtitulo = subtitulo;
         this.localizacao = localizacao;
@@ -38,6 +39,7 @@ public class EscolaInfoDTO {
         this.bioProfessora = bioProfessora;
         this.filosofiaEnsino = filosofiaEnsino;
         this.destaquesProfessora = destaquesProfessora;
+        this.professores = professores;
     }
 
     public String getNome() {
@@ -142,5 +144,13 @@ public class EscolaInfoDTO {
 
     public void setDestaquesProfessora(List<String> destaquesProfessora) {
         this.destaquesProfessora = destaquesProfessora;
+    }
+
+    public List<ProfessorDTO> getProfessores() {
+        return professores;
+    }
+
+    public void setProfessores(List<ProfessorDTO> professores) {
+        this.professores = professores;
     }
 }

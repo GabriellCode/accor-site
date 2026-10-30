@@ -32,7 +32,8 @@ public class DataInitializer implements CommandLineRunner {
                 new Disciplina("Química", "Exatas", "Estrutura atômica, reações químicas, estequiometria e orgânica.", "flask-conical"),
                 new Disciplina("Biologia", "Ciências da Natureza", "Citologia, genética, evolução e ecologia.", "dna"),
                 new Disciplina("História", "Humanas", "História do Brasil, Geral e desenvolvimento crítico.", "landmark"),
-                new Disciplina("Geografia", "Humanas", "Geopolítica, meio ambiente, cartografia e urbanização.", "globe")
+                new Disciplina("Geografia", "Humanas", "Geopolítica, meio ambiente, cartografia e urbanização.", "globe"),
+                new Disciplina("Computação & Lógica", "Tecnologia", "Lógica de programação, pensamento computacional e algoritmos práticos.", "code")
             );
             disciplinaRepository.saveAll(disciplinas);
             System.out.println("Disciplinas cadastradas no banco SQLite com sucesso!");

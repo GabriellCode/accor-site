@@ -1,11 +1,14 @@
 package com.accor.reforcoescolar.controller;
 
 import com.accor.reforcoescolar.dto.EscolaInfoDTO;
+import com.accor.reforcoescolar.dto.ProfessorDTO;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/info")
@@ -14,6 +17,54 @@ public class InfoController {
 
     @GetMapping
     public EscolaInfoDTO getInfo() {
+        List<ProfessorDTO> listaProfessores = Arrays.asList(
+            new ProfessorDTO(
+                "Professora Responsável",
+                "Coordenadora Pedagógica & Tutora",
+                "Linguagens, Humanas & Acompanhamento Escolar",
+                "/professora.jpg",
+                "Com formação de excelência pela UFPE, dedico-me a acompanhar cada aluno de maneira única, identificando onde residem as dificuldades reais para construir uma base sólida e duradoura de conhecimento com afeto e paciência.",
+                "Especialista UFPE",
+                Arrays.asList("Português", "Redação", "Inglês", "História", "Geografia"),
+                Arrays.asList(
+                    "Metodologia ativa e individualizada",
+                    "Apoio completo em tarefas escolares diárias",
+                    "Atendimento no conforto de casa em Aldeia",
+                    "Acompanhamento e relatórios para a família"
+                )
+            ),
+            new ProfessorDTO(
+                "Eduardo",
+                "Professor de Exatas",
+                "Matemática, Física & Química",
+                "/eduardo-avatar.jpg",
+                "Especialista em transformar o 'medo de contas' em compreensão lógica e intuitiva. Foco absoluto em resolução guiada passo a passo, preparação para simulados, provas escolares, SSA e ENEM sem decoreba.",
+                "Exatas & Vestibulares",
+                Arrays.asList("Matemática", "Física", "Química", "Álgebra", "Geometria"),
+                Arrays.asList(
+                    "Desmistificação de fórmulas e cálculos complexos",
+                    "Treinamento intensivo de exercícios e resolução guiada",
+                    "Preparação estratégica para SSA e ENEM",
+                    "Recuperação rápida de notas e base em exatas"
+                )
+            ),
+            new ProfessorDTO(
+                "Gabriell",
+                "Professor de Computação & Lógica",
+                "Lógica de Programação, Algoritmos & Tecnologia",
+                "/gabriell-avatar.jpg",
+                "Apaixonado por ensinar o pensamento computacional e a ciência da computação para jovens e estudantes. Desenvolve raciocínio estruturado, resolução de problemas reais e autonomia através do código.",
+                "Computação & Lógica",
+                Arrays.asList("Lógica de Programação", "Algoritmos", "Pensamento Computacional", "Python", "Web"),
+                Arrays.asList(
+                    "Aprender programando com projetos práticos e jogos",
+                    "Desenvolvimento do raciocínio lógico analítico",
+                    "Base sólida para olimpíadas científicas e tecnologia",
+                    "Aulas dinâmicas e mentoria individualizada"
+                )
+            )
+        );
+
         return new EscolaInfoDTO(
             "ACCOR",
             "REFORÇO ESCOLAR",
@@ -31,7 +82,8 @@ public class InfoController {
                 "Química",
                 "Biologia",
                 "História",
-                "Geografia"
+                "Geografia",
+                "Computação e Lógica"
             ),
             "Professora Especialista UFPE",
             "Com formação de excelência pela Universidade Federal de Pernambuco (UFPE) e vocação para o ensino humanizado, dedico-me a acompanhar cada aluno de maneira única, identificando onde residem as dificuldades reais para construir uma base sólida e duradoura de conhecimento.",
@@ -41,7 +93,8 @@ public class InfoController {
                 "Atendimento domiciliar exclusivo em Aldeia e redondezas",
                 "Metodologia ativa focada no ritmo de cada estudante",
                 "Acompanhamento contínuo de tarefas, provas e vestibulares"
-            )
+            ),
+            listaProfessores
         );
     }
 }
