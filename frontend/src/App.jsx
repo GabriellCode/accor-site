@@ -133,7 +133,7 @@ const DEFAULT_PROFESSORES = [
     nome: "Gabriell",
     cargo: "Professor de Computação & Lógica",
     area: "Computação & Tecnologia",
-    foto: "",
+    foto: "/gabriell.png",
     bio: "Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.",
     badge: "Computação & Lógica",
     especialidades: "Lógica de Programação, Algoritmos, Pensamento Computacional, Python & Web",

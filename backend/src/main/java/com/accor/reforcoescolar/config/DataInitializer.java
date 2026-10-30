@@ -118,7 +118,7 @@ public class DataInitializer implements CommandLineRunner {
                     "Gabriell",
                     "Professor de Computação & Lógica",
                     "Computação & Tecnologia",
-                    "",
+                    "/gabriell.png",
                     "Ensina lógica de programação e pensamento computacional para jovens e estudantes. Metodologia ativa construindo programas e projetos práticos, estimulando raciocínio analítico e criatividade.",
                     "Computação & Lógica",
                     "Lógica de Programação, Algoritmos, Pensamento Computacional, Python & Web",
