@@ -19,18 +19,18 @@ public class InfoController {
     public EscolaInfoDTO getInfo() {
         List<ProfessorDTO> listaProfessores = Arrays.asList(
             new ProfessorDTO(
-                "Professora Responsável",
-                "Coordenadora Pedagógica & Tutora",
-                "Linguagens, Humanas & Acompanhamento Escolar",
+                "Professora Alessandra",
+                "Linguagens & Ensino Fundamental 2 (Todas as Disciplinas)",
+                "Linguagens & Ensino Fundamental 2",
                 "/professora.jpg",
-                "Com formação de excelência pela UFPE, dedico-me a acompanhar cada aluno de maneira única, identificando onde residem as dificuldades reais para construir uma base sólida e duradoura de conhecimento com afeto e paciência.",
+                "Formada pela UFPE, atua com foco em Linguagens e no acompanhamento completo de todas as disciplinas do Ensino Fundamental 2. Dedica-se a construir uma base sólida com metodologia afetiva, acolhedora e aulas 1:1 no domicílio em Aldeia.",
                 "Especialista UFPE",
-                Arrays.asList("Português", "Redação", "Inglês", "História", "Geografia"),
+                Arrays.asList("Linguagens", "Português", "Redação", "Fund. 2 (Todas as Matérias)", "Inglês"),
                 Arrays.asList(
-                    "Metodologia ativa e individualizada",
-                    "Apoio completo em tarefas escolares diárias",
-                    "Atendimento no conforto de casa em Aldeia",
-                    "Acompanhamento e relatórios para a família"
+                    "Acompanhamento completo de todas as matérias do Fundamental 2",
+                    "Especialista em Linguagens, interpretação e redação",
+                    "Aulas 1:1 com metodologia afetiva no domicílio em Aldeia",
+                    "Acompanhamento contínuo e relatórios para a família"
                 )
             ),
             new ProfessorDTO(

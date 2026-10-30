@@ -549,14 +549,14 @@ function App() {
 
         {/* Grade com os Professores da Equipe ACCOR */}
         <div className="professores-grid">
-          {/* Card 1: Professora Responsável */}
+          {/* Card 1: Professora Alessandra */}
           <div className="professor-card-item">
             <div className="prof-top-bar" style={{ backgroundColor: '#DC2626' }} />
             <div className="prof-header-box">
               <div className="prof-avatar-wrap">
                 <img 
                   src="/professora.jpg" 
-                  alt="Professora Responsável" 
+                  alt="Professora Alessandra" 
                   decoding="async"
                   loading="lazy"
                 />
@@ -564,38 +564,27 @@ function App() {
               <span className="prof-badge-tag" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
                 <GraduationCap size={14} /> Especialista UFPE
               </span>
-              <h3 className="prof-name-title">Professora Responsável</h3>
-              <p className="prof-role-subtitle">Coordenadora & Tutora de Reforço</p>
+              <h3 className="prof-name-title">Professora Alessandra</h3>
+              <p className="prof-role-subtitle">Linguagens & Ensino Fundamental 2</p>
 
               <div className="prof-specialties-tags">
+                <span className="prof-spec-pill">Linguagens</span>
+                <span className="prof-spec-pill">Fund. 2 (Todas as Matérias)</span>
                 <span className="prof-spec-pill">Português</span>
                 <span className="prof-spec-pill">Redação</span>
-                <span className="prof-spec-pill">Inglês</span>
-                <span className="prof-spec-pill">Humanas</span>
               </div>
             </div>
 
             <div className="prof-body-box">
               <p className="prof-bio-text">
-                Formada pela <strong>UFPE</strong>, com foco em alfabetização, hábitos de estudo, superação de bloqueios e acompanhamento diário de tarefas escolares para Fundamental e Médio com didática afetiva.
+                Formada pela <strong>UFPE</strong>, a professora Alessandra atua com foco em Linguagens e no acompanhamento pedagógico completo de <strong>todas as disciplinas do Ensino Fundamental 2</strong>, auxiliando nas tarefas diárias, superação de bloqueios e base sólida com didática afetiva.
               </p>
 
               <ul className="prof-features-list">
-                <li><CheckCircle2 size={16} color="#16A34A" /> Metodologia afetiva e acolhedora</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas 1:1 no domicílio em Aldeia</li>
-                <li><CheckCircle2 size={16} color="#16A34A" /> Relatórios de evolução periódicos para os pais</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Acompanhamento de todas as matérias do Fundamental 2</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Especialista em Linguagens, interpretação e redação</li>
+                <li><CheckCircle2 size={16} color="#16A34A" /> Aulas 1:1 no domicílio em Aldeia com acolhimento</li>
               </ul>
-
-              <a 
-                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20uma%20aula%20com%20a%20Professora%20Respons%C3%A1vel." 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-contact-prof"
-                style={{ backgroundColor: '#DC2626' }}
-              >
-                <MessageCircle size={18} />
-                <span>Agendar com a Professora</span>
-              </a>
             </div>
           </div>
 
@@ -625,7 +614,7 @@ function App() {
 
             <div className="prof-body-box">
               <p className="prof-bio-text">
-                Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, colégio e vestibulares.
+                Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.
               </p>
 
               <ul className="prof-features-list">
@@ -633,17 +622,6 @@ function App() {
                 <li><CheckCircle2 size={16} color="#16A34A" /> Foco intensivo para provas do colégio, SSA e ENEM</li>
                 <li><CheckCircle2 size={16} color="#16A34A" /> Recuperação rápida de base e autoconfiança</li>
               </ul>
-
-              <a 
-                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20aulas%20de%20Exatas%20com%20o%20Professor%20Eduardo." 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-contact-prof"
-                style={{ backgroundColor: '#2563EB' }}
-              >
-                <MessageCircle size={18} />
-                <span>Agendar com Prof. Eduardo</span>
-              </a>
             </div>
           </div>
 
@@ -681,17 +659,6 @@ function App() {
                 <li><CheckCircle2 size={16} color="#16A34A" /> Raciocínio lógico estruturado aplicável a todas as áreas</li>
                 <li><CheckCircle2 size={16} color="#16A34A" /> Mentoria individual e introdução ao mercado de tech</li>
               </ul>
-
-              <a 
-                href="https://wa.me/5581991225450?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20aulas%20de%20Computa%C3%A7%C3%A3o%20e%20L%C3%B3gica%20com%20o%20Professor%20Gabriell." 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-contact-prof"
-                style={{ backgroundColor: '#0D9488' }}
-              >
-                <MessageCircle size={18} />
-                <span>Agendar com Prof. Gabriell</span>
-              </a>
             </div>
           </div>
         </div>
