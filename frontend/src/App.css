@@ -57,8 +57,7 @@
 
 /* Header */
 .site-header {
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.98);
   border-bottom: 2px dashed #E2D9C8;
   padding: 0.75rem 1.5rem;
 }
@@ -168,9 +167,17 @@
 
 /* Hero Section */
 .hero-section {
-  padding: 3rem 1.5rem 2rem;
-  max-width: 1200px;
+  padding: 2.8rem 4rem 2rem;
+  max-width: 1120px;
   margin: 0 auto;
+}
+
+.hero-content {
+  background: rgba(253, 248, 237, 0.92);
+  padding: 1.8rem 2rem;
+  border-radius: 24px;
+  border: 2px solid #FDE68A;
+  box-shadow: 0 10px 30px rgba(180, 83, 9, 0.06);
 }
 
 .hero-grid {
@@ -371,14 +378,20 @@
 
 /* Disciplines Section */
 .section-wrapper {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 3rem auto;
-  padding: 0 1.5rem;
+  padding: 0 4rem;
 }
 
 .section-header {
   text-align: center;
   margin-bottom: 2.5rem;
+  background: rgba(253, 248, 237, 0.9);
+  padding: 1.2rem 1.8rem;
+  border-radius: 20px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .section-tag {
@@ -407,8 +420,9 @@
 
 .disciplinas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.4rem;
+  align-items: stretch;
 }
 
 .disciplina-card {
@@ -419,15 +433,24 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.04);
   position: relative;
   overflow: hidden;
-  transition: all 0.25s ease;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 225px;
 }
 
-.disciplina-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-  border-color: #E2E8F0;
+.disciplina-card:hover,
+.disciplina-card.reveal-on-scroll.is-revealed:hover {
+  transform: translate3d(0, -8px, 0) scale(1.025);
+  box-shadow: 0 20px 36px rgba(15, 23, 42, 0.12);
+  border-color: #CBD5E1;
+  z-index: 5;
+}
+
+.disciplinas-grid:hover .disciplina-card.is-revealed:not(:hover) {
+  opacity: 0.8;
+  transform: translate3d(0, 0, 0) scale(0.985);
 }
 
 .card-top-bar {
@@ -447,6 +470,11 @@
   justify-content: center;
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  transition: transform 0.28s ease;
+}
+
+.disciplina-card:hover .disciplina-icon-wrap {
+  transform: scale(1.1);
 }
 
 .disciplina-category {
@@ -472,16 +500,36 @@
 /* Metodologia / Beneficios */
 .methodology-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.4rem;
+  align-items: stretch;
 }
 
 .method-card {
   background: #FFFFFF;
   border-radius: 16px;
-  padding: 1.8rem;
+  padding: 1.6rem;
   box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-  border: 1px solid #E2D9C8;
+  border: 1.5px solid #E2D9C8;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 215px;
+  position: relative;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.method-card:hover,
+.method-card.reveal-on-scroll.is-revealed:hover {
+  transform: translate3d(0, -8px, 0) scale(1.025);
+  box-shadow: 0 20px 36px rgba(234, 88, 12, 0.13);
+  border-color: #FDBA74;
+  z-index: 5;
+}
+
+.methodology-grid:hover .method-card.is-revealed:not(:hover) {
+  opacity: 0.8;
+  transform: translate3d(0, 0, 0) scale(0.985);
 }
 
 .method-number {
@@ -490,17 +538,24 @@
   color: #EA580C;
   opacity: 0.4;
   margin-bottom: 0.4rem;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.method-card:hover .method-number {
+  opacity: 0.85;
+  transform: scale(1.06);
 }
 
 .method-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: #1E293B;
   margin-bottom: 0.5rem;
 }
 
 .method-card p {
   color: #64748B;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
+  flex-grow: 1;
 }
 
 /* Form Section */
@@ -1008,80 +1063,49 @@
 }
 
 /* =========================================
-   EFEITOS FADE-IN, FADE-OUT E MOTION BLUR
+   EFEITOS FADE-IN, FADE-OUT E SCROLL REVEAL (UMA VEZ)
 ========================================= */
 
-/* Fade-in e Fade-out base */
+/* Fade-in ao rolar a página (dispara apenas 1 vez ao carregar/recarregar) */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Fade-in e Fade-out suaves para troca de cards */
 .fade-in {
-  animation: fadeInEffect 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInEffect 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fade-out {
-  animation: fadeOutEffect 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeOutEffect 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeInEffect {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translate3d(0, 10px, 0) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @keyframes fadeOutEffect {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateY(-18px);
-  }
-}
-
-/* Efeito de Motion Blur dinâmico ao deslizar */
-.motion-blur-slide-left {
-  animation: motionBlurLeft 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-.motion-blur-slide-right {
-  animation: motionBlurRight 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes motionBlurLeft {
-  0% {
-    filter: blur(10px);
-    transform: translateX(45px) scale(0.96);
-    opacity: 0.3;
-  }
-  50% {
-    filter: blur(4px);
-    opacity: 0.8;
-  }
-  100% {
-    filter: blur(0px);
-    transform: translateX(0) scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes motionBlurRight {
-  0% {
-    filter: blur(10px);
-    transform: translateX(-45px) scale(0.96);
-    opacity: 0.3;
-  }
-  50% {
-    filter: blur(4px);
-    opacity: 0.8;
-  }
-  100% {
-    filter: blur(0px);
-    transform: translateX(0) scale(1);
-    opacity: 1;
+    transform: translate3d(0, -10px, 0) scale(0.99);
   }
 }
 
@@ -1160,26 +1184,36 @@
   transform: translateY(-2px);
 }
 
-/* Card Principal do Carrossel */
+/* Card Principal do Carrossel com Tamanho Fixo Uniforme */
 .carousel-viewport {
   max-width: 820px;
   margin: 0 auto;
   position: relative;
-  min-height: 280px;
+  min-height: 310px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
 }
 
 .avaliacao-card-spotlight {
   background: #FFFFFF;
   border-radius: 20px;
-  padding: 2.5rem;
+  padding: 2.2rem 2.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-  border: 1px solid #E2E8F0;
+  border: 1.5px solid #E2E8F0;
   width: 100%;
+  min-height: 310px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
-  transition: filter 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.avaliacao-card-spotlight:hover {
+  transform: translate3d(0, -6px, 0) scale(1.015);
+  box-shadow: 0 20px 38px rgba(15, 23, 42, 0.11);
+  border-color: #CBD5E1;
 }
 
 .avaliacao-quote-icon {
@@ -1188,6 +1222,36 @@
   right: 1.8rem;
   color: #FDE68A;
   opacity: 0.6;
+}
+
+.google-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #BFDBFE;
+  width: fit-content;
+}
+
+.google-email-tag {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.avaliacao-empty-card {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .resultado-destaque-badge {
@@ -1200,16 +1264,20 @@
   font-size: 0.82rem;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
   border: 1px solid #86EFAC;
+  width: fit-content;
 }
 
 .avaliacao-depoimento-texto {
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   color: #334155;
-  line-height: 1.7;
+  line-height: 1.65;
   font-style: italic;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
 }
 
 .avaliacao-autor-footer {
@@ -1220,6 +1288,7 @@
   gap: 1rem;
   padding-top: 1.2rem;
   border-top: 1px solid #F1F5F9;
+  margin-top: auto;
 }
 
 .avaliacao-autor-info {
@@ -1284,7 +1353,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-carousel-ctrl:hover {
@@ -1304,7 +1373,7 @@
   height: 12px;
   border-radius: 999px;
   background: #CBD5E1;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.25s ease, background-color 0.25s ease;
   padding: 0;
 }
 
@@ -1346,36 +1415,11 @@
 }
 
 /* =========================================
-   OTIMIZAÇÕES DE PERFORMANCE PARA 60+ FPS
-========================================= */
-
-/* Promoção para camada GPU dedicada e renderização assíncrona */
-.section-wrapper {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 650px;
-  contain: layout style;
-}
-
-.disciplina-card,
-.method-card,
-.teacher-profile-wrapper,
-.avaliacoes-container,
-.contact-container {
-  transform: translate3d(0, 0, 0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-/* =========================================
-   MOTION BLUR GLOBAL AO SCROLLAR A PÁGINA (GPU 60-120 FPS)
+   CONTAINER DE CONTEÚDO COM ROLAGEM NATIVA LEVE
 ========================================= */
 .scroll-motion-blur-content {
-  will-change: transform, filter;
-  transform: translate3d(0, 0, 0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  perspective: 1000px;
-  transform-origin: center top;
+  position: relative;
+  z-index: 1;
 }
 
 /* =========================================
@@ -1384,9 +1428,10 @@
 
 .professores-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
+  align-items: stretch;
 }
 
 .professor-card-item {
@@ -1396,15 +1441,23 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
 }
 
-.professor-card-item:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.09);
-  border-color: #CBD5E1;
+.professor-card-item:hover,
+.professor-card-item.reveal-on-scroll.is-revealed:hover {
+  transform: translate3d(0, -8px, 0) scale(1.025);
+  box-shadow: 0 22px 42px rgba(15, 23, 42, 0.14);
+  border-color: #94A3B8;
+  z-index: 5;
+}
+
+.professores-grid:hover .professor-card-item.is-revealed:not(:hover) {
+  opacity: 0.78;
+  transform: translate3d(0, 0, 0) scale(0.985);
 }
 
 .prof-top-bar {
@@ -1413,9 +1466,12 @@
 }
 
 .prof-header-box {
-  padding: 1.8rem 1.8rem 1rem;
+  padding: 1.6rem 1.4rem 0.8rem;
   text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .prof-avatar-wrap {
@@ -1448,7 +1504,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
@@ -1458,47 +1514,54 @@
 }
 
 .prof-name-title {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   color: #1E293B;
   margin-bottom: 0.2rem;
 }
 
 .prof-role-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #64748B;
   margin-bottom: 0.8rem;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .prof-specialties-tags {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-content: flex-start;
   gap: 0.4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
+  min-height: 58px;
 }
 
 .prof-spec-pill {
   background: #F1F5F9;
   color: #334155;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.55rem;
   border-radius: 6px;
 }
 
 .prof-body-box {
-  padding: 0 1.8rem 1.8rem;
+  padding: 0 1.4rem 1.6rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .prof-bio-text {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: #475569;
   line-height: 1.6;
   margin-bottom: 1.2rem;
+  flex-grow: 1;
 }
 
 .prof-features-list {
@@ -1506,8 +1569,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  margin-bottom: 1.5rem;
-  flex-grow: 1;
+  margin-bottom: 0.5rem;
+  margin-top: auto;
 }
 
 .prof-features-list li {
@@ -1883,3 +1946,312 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+/* =========================================
+   RESPONSIVIDADE COMPLETA (TABLETS, CELULARES E TELAS GRANDES)
+========================================= */
+
+@media (max-width: 1024px) {
+  .hero-section,
+  .section-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .hero-title {
+    font-size: 2.6rem;
+  }
+
+  .professores-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .professores-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding-top: 112px;
+  }
+
+  .site-header {
+    padding: 0.6rem 1rem;
+  }
+
+  .header-content {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .brand-logo-text {
+    font-size: 1.4rem;
+  }
+
+  .brand-sub {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+  }
+
+  /* Barra de navegação horizontal rolável em celulares/tablets */
+  .header-nav {
+    display: flex !important;
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-top: 0.45rem;
+    border-top: 1px dashed #E2E8F0;
+    scrollbar-width: none;
+  }
+
+  .header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-nav-link {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .btn-header-admin span {
+    display: none;
+  }
+
+  .btn-header-admin {
+    padding: 0.45rem 0.65rem;
+  }
+
+  .btn-header-whatsapp {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  /* Hero responsivo */
+  .hero-section {
+    padding: 1.8rem 1.25rem 1.5rem;
+    text-align: center;
+  }
+
+  .hero-info-tags {
+    justify-content: center;
+  }
+
+  .hero-title {
+    font-size: 2.15rem;
+  }
+
+  .hero-subtitle-reforco {
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+  }
+
+  .hero-tagline-box {
+    text-align: left;
+    padding: 0.85rem 1rem;
+  }
+
+  .hero-tagline-main {
+    font-size: 1.08rem;
+  }
+
+  .hero-tagline-sub {
+    font-size: 0.92rem;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary-action,
+  .btn-whatsapp-action {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .phone-quick-call {
+    margin: 0 auto;
+    font-size: 1rem;
+  }
+
+  .poster-frame {
+    max-width: 340px;
+    transform: rotate(0deg);
+  }
+
+  /* Seções gerais */
+  .section-wrapper {
+    margin: 2.2rem auto;
+    padding: 0 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .section-desc {
+    font-size: 0.95rem;
+  }
+
+  /* Professores e Disciplinas em 1 coluna confortável no mobile */
+  .professores-grid,
+  .disciplinas-grid,
+  .methodology-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .prof-header-box {
+    padding: 1.4rem 1.2rem 0.8rem;
+  }
+
+  .prof-body-box {
+    padding: 0 1.2rem 1.4rem;
+  }
+
+  /* Avaliações / Carrossel */
+  .avaliacoes-container {
+    padding: 1.8rem 1.1rem;
+    border-radius: 20px;
+  }
+
+  .avaliacoes-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .avaliacoes-score-box {
+    justify-content: center;
+  }
+
+  .btn-nova-avaliacao {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .avaliacao-card-spotlight {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .avaliacao-depoimento-texto {
+    font-size: 1rem;
+  }
+
+  .avaliacao-autor-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Formulário de Contato */
+  .contact-container {
+    padding: 1.4rem 1.1rem;
+    gap: 1.8rem;
+    border-radius: 18px;
+  }
+
+  .form-info-col h3 {
+    font-size: 1.45rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .whatsapp-box-direct {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .whatsapp-box-direct .btn-header-whatsapp {
+    justify-content: center;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  /* Admin e Modais */
+  .admin-navbar {
+    padding: 0.85rem 1rem;
+  }
+
+  .admin-professores-list,
+  .admin-materias-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .solicitacao-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .solicitacao-details {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-overlay {
+    padding: 0.85rem;
+  }
+
+  .modal-review-content,
+  .modal-content {
+    padding: 1.35rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Botão flutuante de WhatsApp compacto em telas menores */
+  .floating-whatsapp {
+    bottom: 16px;
+    right: 16px;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-sub {
+    display: none;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+  }
+
+  .tag-location,
+  .tag-ufpe {
+    font-size: 0.76rem;
+    padding: 0.3rem 0.65rem;
+  }
+
+  /* Suaviza a moldura de lápis em celulares muito estreitos para não cobrir o texto */
+  .bg-fixed-gpu {
+    opacity: 0.35;
+  }
+
+  .floating-whatsapp span {
+    display: none;
+  }
+
+  .floating-whatsapp {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+}
+

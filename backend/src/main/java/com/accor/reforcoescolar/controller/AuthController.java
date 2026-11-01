@@ -28,12 +28,11 @@ public class AuthController {
         String user = request.getUsername() != null ? request.getUsername().trim() : "";
         String pass = request.getPassword() != null ? request.getPassword().trim() : "";
 
-        // Aceita 'admin' / 'admin' ou 'admin' / 'accor123'
-        if ("admin".equalsIgnoreCase(user) && ("admin".equals(pass) || "accor123".equals(pass))) {
+        if ("accor@2026".equalsIgnoreCase(user) && ("accor@2k26.!".equals(pass) || "accor@2k26.".equals(pass))) {
             Map<String, Object> response = new HashMap<>();
             response.put("sucesso", true);
             response.put("token", "accor-adm-token-" + System.currentTimeMillis());
-            response.put("usuario", "admin");
+            response.put("usuario", "accor@2026");
             response.put("nome", "Administrador ACCOR");
             return ResponseEntity.ok(response);
         }

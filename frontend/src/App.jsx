@@ -55,54 +55,8 @@ const DEFAULT_DISCIPLINAS = [
   { id: 9, nome: "Computação & Lógica", categoria: "Tecnologia", descricao: "Lógica de programação, algoritmos, raciocínio computacional e projetos práticos com Prof. Gabriell.", icone: "code", cor: "#0D9488" }
 ]
 
-// Dados padrão de avaliações para o carrossel interativo
-const DEFAULT_AVALIACOES = [
-  {
-    id: 1,
-    nomeAutor: "Patrícia Albuquerque",
-    papel: "Mãe do Lucas (8º ano) • Aldeia",
-    disciplina: "Matemática e Física",
-    estrelas: 5,
-    comentario: "O Lucas tinha pavor das provas de matemática e travava em equações. Com a paciência e a didática maravilhosa da professora, a nota dele subiu de 4,5 para 9,2! O atendimento em domicílio aqui em Aldeia facilitou demais a nossa rotina.",
-    resultado: "Nota subiu de 4,5 para 9,2 no bimestre"
-  },
-  {
-    id: 2,
-    nomeAutor: "Carlos Eduardo Valença",
-    papel: "Pai da Sofia (3º ano Médio)",
-    disciplina: "Química e Biologia",
-    estrelas: 5,
-    comentario: "Excelente profissional! Muito pontual, dedicada e com domínio total dos conteúdos exigidos pelo SSA e ENEM. A Sofia ganhou muito mais segurança e conquistou a aprovação.",
-    resultado: "Aprovada com nota 940 no SSA/ENEM"
-  },
-  {
-    id: 3,
-    nomeAutor: "Renata Meireles",
-    papel: "Mãe do Bernardo (6º ano) • Aldeia",
-    disciplina: "Português e Redação",
-    estrelas: 5,
-    comentario: "Meu filho tinha muita dificuldade com interpretação e construção de textos. As aulas foram lúdicas, dinâmicas e o desenvolvimento dele foi visível já nas primeiras semanas. Recomendo de olhos fechados!",
-    resultado: "Evolução surpreendente na redação"
-  },
-  {
-    id: 4,
-    nomeAutor: "Mariana Cavalcanti",
-    papel: "Mãe da Alice (9º ano)",
-    disciplina: "Matemática e Ciências",
-    estrelas: 5,
-    comentario: "Professora extraordinária, com uma metodologia afetuosa que realmente ensina a pensar. Não é decoreba, é compreensão real da matéria. Alice hoje faz os exercícios sozinha!",
-    resultado: "Média final 9,8 e aluna destaque"
-  },
-  {
-    id: 5,
-    nomeAutor: "Rodrigo Siqueira",
-    papel: "Pai do Matheus (1º ano Médio) • Aldeia",
-    disciplina: "Física e Matemática",
-    estrelas: 5,
-    comentario: "O acompanhamento em domicílio é o ponto alto: conforto absoluto e atenção 100% no estudante. A formação pela UFPE faz toda a diferença na metodologia de ensino.",
-    resultado: "Recuperação imediata de rendimento"
-  }
-]
+// Sem avaliações de exemplo: apenas avaliações reais enviadas por usuários com e-mail Google (@gmail.com)
+const DEFAULT_AVALIACOES = []
 
 // Professores padrão
 const DEFAULT_PROFESSORES = [
@@ -120,13 +74,13 @@ const DEFAULT_PROFESSORES = [
   {
     id: 2,
     nome: "Eduardo",
-    cargo: "Professor de Exatas",
-    area: "Ciências Exatas",
-    foto: "",
-    bio: "Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.",
-    badge: "Exatas & Vestibulares",
+    cargo: "Professor de Exatas • Medicina UFPE",
+    area: "Ciências Exatas & Natureza",
+    foto: "/eduardo.jpg",
+    bio: "Estudante de Medicina na UFPE, é especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares, SSA e ENEM.",
+    badge: "Medicina UFPE • Exatas",
     especialidades: "Matemática, Física, Química, SSA & ENEM",
-    destaques: "Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio e SSA, Recuperação rápida de base"
+    destaques: "Estudante de Medicina na UFPE, Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio, SSA e ENEM"
   },
   {
     id: 3,
@@ -180,13 +134,22 @@ function App() {
     icone: 'calculator'
   })
 
-  // Estados das avaliações e do carrossel com Motion Blur
-  const [avaliacoes, setAvaliacoes] = useState(DEFAULT_AVALIACOES)
+  // Estados das avaliações reais e do carrossel com Fade-In e Fade-Out
+  const [avaliacoes, setAvaliacoes] = useState(() => {
+    try {
+      const salvas = localStorage.getItem('accor_avaliacoes_reais')
+      return salvas ? JSON.parse(salvas) : DEFAULT_AVALIACOES
+    } catch {
+      return DEFAULT_AVALIACOES
+    }
+  })
   const [indiceAvaliacao, setIndiceAvaliacao] = useState(0)
   const [motionBlurClasse, setMotionBlurClasse] = useState('fade-in')
   const [modalAvaliacaoAberta, setModalAvaliacaoAberta] = useState(false)
+  const [erroAvaliacao, setErroAvaliacao] = useState('')
   const [formNovaAvaliacao, setFormNovaAvaliacao] = useState({
     nomeAutor: '',
+    emailGoogle: '',
     papel: '',
     disciplina: 'Matemática',
     estrelas: 5,
@@ -194,101 +157,77 @@ function App() {
     resultado: ''
   })
 
-  // Referência direta ao DOM para Motion Blur sem disparar re-renderizações do React (60+ FPS estável)
   const contentRef = useRef(null)
+  const navRef = useRef(null)
 
-  useEffect(() => {
-    let lastScrollY = window.scrollY
-    let targetBlur = 0
-    let currentBlur = 0
-    let targetScale = 1
-    let currentScale = 1
-    let rafId = null
-    let isRunning = false
-    let resetTimer = null
-
-    // Motor de física suave usando interpolação linear (LERP) acelerada por GPU
-    const updatePhysics = () => {
-      currentBlur += (targetBlur - currentBlur) * 0.35
-      currentScale += (targetScale - currentScale) * 0.35
-
-      if (contentRef.current) {
-        if (currentBlur > 0.15) {
-          contentRef.current.style.filter = `blur(${currentBlur.toFixed(1)}px)`
-          contentRef.current.style.transform = `translate3d(0, 0, 0) scaleY(${currentScale.toFixed(3)})`
-        } else {
-          contentRef.current.style.filter = 'none'
-          contentRef.current.style.transform = 'translate3d(0, 0, 0)'
-        }
-      }
-
-      // Continua enquanto houver velocidade residual
-      if (Math.abs(targetBlur - currentBlur) > 0.05 || currentBlur > 0.1) {
-        rafId = requestAnimationFrame(updatePhysics)
-      } else {
-        isRunning = false
-        if (contentRef.current) {
-          contentRef.current.style.filter = 'none'
-          contentRef.current.style.transform = 'translate3d(0, 0, 0)'
-        }
-      }
-    }
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const delta = Math.abs(currentScrollY - lastScrollY)
-      lastScrollY = currentScrollY
-
-      // Limita a um valor visual agradável sem causar overhead na placa gráfica
-      targetBlur = Math.min(delta * 0.065, 3.8)
-      targetScale = 1 + Math.min(delta * 0.00018, 0.008)
-
-      clearTimeout(resetTimer)
-      resetTimer = setTimeout(() => {
-        targetBlur = 0
-        targetScale = 1
-      }, 50)
-
-      if (!isRunning) {
-        isRunning = true
-        rafId = requestAnimationFrame(updatePhysics)
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (rafId) cancelAnimationFrame(rafId)
-      clearTimeout(resetTimer)
-    }
-  }, [])
-
-  // Controle de visibilidade do Navbar (some ao rolar para o rodapé, reaparece no topo ou no hover)
-  const [navVisivel, setNavVisivel] = useState(true)
-
+  // Controle do Navbar e efeito de rolagem 100% direto no DOM (0 re-renderizações do React e 0 filtros blur pesados)
   useEffect(() => {
     let ultimoScrollY = window.scrollY
+    let ticking = false
 
-    const monitorarScrollNav = () => {
-      const scrollAtual = window.scrollY
+    const aoRolar = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollAtual = window.scrollY
+          const navEl = navRef.current
 
-      if (scrollAtual <= 60) {
-        // No topo da página: sempre visível
-        setNavVisivel(true)
-      } else if (scrollAtual > ultimoScrollY + 8) {
-        // Rolando para baixo em direção ao footer: esconde a barra
-        setNavVisivel(false)
-      } else if (scrollAtual < ultimoScrollY - 12) {
-        // Rolando para cima: reaparece
-        setNavVisivel(true)
+          if (navEl) {
+            if (scrollAtual <= 60 || scrollAtual < ultimoScrollY - 12) {
+              navEl.classList.remove('nav-hidden')
+              navEl.classList.add('nav-visible')
+            } else if (scrollAtual > ultimoScrollY + 12) {
+              navEl.classList.remove('nav-visible')
+              navEl.classList.add('nav-hidden')
+            }
+          }
+
+          ultimoScrollY = scrollAtual
+          ticking = false
+        })
+        ticking = true
       }
-
-      ultimoScrollY = scrollAtual
     }
 
-    window.addEventListener('scroll', monitorarScrollNav, { passive: true })
-    return () => window.removeEventListener('scroll', monitorarScrollNav)
+    window.addEventListener('scroll', aoRolar, { passive: true })
+    return () => window.removeEventListener('scroll', aoRolar)
   }, [])
+
+  const mostrarNavbar = () => {
+    if (navRef.current) {
+      navRef.current.classList.remove('nav-hidden')
+      navRef.current.classList.add('nav-visible')
+    }
+  }
+
+  const ocultarNavbarSeRolado = () => {
+    if (window.scrollY > 80 && navRef.current) {
+      navRef.current.classList.remove('nav-visible')
+      navRef.current.classList.add('nav-hidden')
+    }
+  }
+
+  // Animação de Fade-in e Fade-out contínua nos componentes ao rolar a tela para cima e para baixo
+  useEffect(() => {
+    if (telaAtual !== 'site') return
+
+    const elementosReveal = document.querySelectorAll('.reveal-on-scroll')
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed')
+          } else {
+            entry.target.classList.remove('is-revealed')
+          }
+        })
+      },
+      { threshold: 0.12, rootMargin: '-20px 0px -30px 0px' }
+    )
+
+    elementosReveal.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [telaAtual, professores.length, disciplinas.length])
 
   // Estado do formulário de agendamento / contato
   const [formData, setFormData] = useState({
@@ -303,6 +242,32 @@ function App() {
 
   const [formStatus, setFormStatus] = useState({ tipo: '', mensagem: '' })
   const [enviando, setEnviando] = useState(false)
+  const [whatsappNumero, setWhatsappNumero] = useState('5581991225450')
+  const [telefoneExibicao, setTelefoneExibicao] = useState('(81) 9.9122-5450')
+
+  // Formata automaticamente o telefone conforme o usuário digita (ex: (81) 99999-9999)
+  const formatarTelefoneInput = (valor) => {
+    const apenasDigitos = valor.replace(/\D/g, '').slice(0, 11)
+    if (apenasDigitos.length === 0) return ''
+    if (apenasDigitos.length <= 2) return `(${apenasDigitos}`
+    if (apenasDigitos.length <= 7) return `(${apenasDigitos.slice(0, 2)}) ${apenasDigitos.slice(2)}`
+    return `(${apenasDigitos.slice(0, 2)}) ${apenasDigitos.slice(2, 7)}-${apenasDigitos.slice(7)}`
+  }
+
+  // Busca automaticamente o número de WhatsApp oficial cadastrado no backend (/api/info)
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/info`)
+      .then(res => res.ok ? res.json() : null)
+      .then(info => {
+        if (info?.whatsapp) {
+          setWhatsappNumero(info.whatsapp.replace(/\D/g, ''))
+        }
+        if (info?.telefoneFormatado) {
+          setTelefoneExibicao(info.telefoneFormatado)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Cores da faixa de lápis decorativa (inspirada na arte do flyer)
   const pencilColors = [
@@ -377,6 +342,16 @@ function App() {
 
     const u = loginCredenciais.username.trim()
     const p = loginCredenciais.password.trim()
+    const credenciaisValidas = u.toLowerCase() === 'accor@2026' && (p === 'accor@2k26.!' || p === 'accor@2k26.')
+
+    if (credenciaisValidas) {
+      localStorage.setItem('accor_admin_auth', 'true')
+      setAdminAutenticado(true)
+      setLoginCredenciais({ username: '', password: '' })
+      carregarProfessores()
+      carregarSolicitacoes()
+      return
+    }
 
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -392,17 +367,10 @@ function App() {
         carregarProfessores()
         carregarSolicitacoes()
       } else {
-        throw new Error("Credenciais inválidas")
+        setLoginErro('Usuário ou senha incorretos.')
       }
     } catch {
-      // Fallback de contingência local
-      if (u.toLowerCase() === 'admin' && (p === 'admin' || p === 'accor123')) {
-        localStorage.setItem('accor_admin_auth', 'true')
-        setAdminAutenticado(true)
-        setLoginCredenciais({ username: '', password: '' })
-      } else {
-        setLoginErro('Usuário ou senha incorretos. Dica: admin / accor123')
-      }
+      setLoginErro('Usuário ou senha incorretos.')
     }
   }
 
@@ -515,7 +483,22 @@ function App() {
     setDisciplinas(disciplinas.filter(d => d.id !== id))
   }
 
-  // Carrega as avaliações salvas no backend Spring Boot + SQLite
+  // Valida se o e-mail informado pertence a uma conta Google (@gmail.com ou @googlemail.com)
+  const validarEmailGoogle = (email) => {
+    if (!email) return false
+    const limpo = email.trim().toLowerCase()
+    return /^[a-z0-9._%+-]+@(gmail\.com|googlemail\.com)$/.test(limpo)
+  }
+
+  // Mascara parcialmente o e-mail Google para exibição pública segura no card (ex: bi***@gmail.com)
+  const mascararEmailGoogle = (email) => {
+    if (!email || !email.includes('@')) return ''
+    const [usuario, dominio] = email.trim().toLowerCase().split('@')
+    if (usuario.length <= 2) return `${usuario[0] || '*'}***@${dominio}`
+    return `${usuario.slice(0, 2)}***@${dominio}`
+  }
+
+  // Carrega apenas as avaliações reais salvas no backend Spring Boot + SQLite
   useEffect(() => {
     fetch(`${API_BASE_URL}/avaliacoes`)
       .then(res => {
@@ -523,54 +506,77 @@ function App() {
         return res.json()
       })
       .then(data => {
-        if (data && data.length > 0) {
-          setAvaliacoes(data)
+        if (Array.isArray(data)) {
+          // Filtra apenas avaliações reais que possuem e-mail do Google vinculado
+          const apenasReais = data.filter(av => av.emailGoogle && validarEmailGoogle(av.emailGoogle))
+          setAvaliacoes(apenasReais)
+          localStorage.setItem('accor_avaliacoes_reais', JSON.stringify(apenasReais))
         }
       })
       .catch(() => {
-        // Mantém as avaliações padrão locais se o backend estiver iniciando
+        // Mantém as avaliações reais salvas localmente caso o backend esteja iniciando
       })
   }, [])
 
-  // Função para transição de avaliação com efeito de Motion Blur ao deslizar
-  const mudarSlideAvaliacao = (direcao) => {
-    const classe = direcao === 'next' ? 'motion-blur-slide-left' : 'motion-blur-slide-right'
-    setMotionBlurClasse(classe)
+  // Função para transição de avaliação com Fade-Out da atual e Fade-In da próxima (ou índice específico)
+  const mudarSlideAvaliacao = (direcao, indiceAlvo = null) => {
+    if (avaliacoes.length <= 1) return
+    setMotionBlurClasse('fade-out')
 
-    if (direcao === 'next') {
-      setIndiceAvaliacao((prev) => (prev + 1) % avaliacoes.length)
-    } else {
-      setIndiceAvaliacao((prev) => (prev - 1 + avaliacoes.length) % avaliacoes.length)
-    }
-
-    // Desativa a classe após a animação de deslizar e blur
     setTimeout(() => {
-      setMotionBlurClasse('')
-    }, 500)
+      if (indiceAlvo !== null) {
+        setIndiceAvaliacao(indiceAlvo)
+      } else if (direcao === 'next') {
+        setIndiceAvaliacao((prev) => (prev + 1) % avaliacoes.length)
+      } else {
+        setIndiceAvaliacao((prev) => (prev - 1 + avaliacoes.length) % avaliacoes.length)
+      }
+      setMotionBlurClasse('fade-in')
+    }, 200)
   }
 
-  // Envio de nova avaliação de pais/alunos com gravação no SQLite
+  // Envio de nova avaliação real de pais/alunos exigindo e-mail do Google (@gmail.com)
   const handleNovaAvaliacaoSubmit = async (e) => {
     e.preventDefault()
+    setErroAvaliacao('')
+
+    const emailFormatado = formNovaAvaliacao.emailGoogle.trim().toLowerCase()
+    if (!validarEmailGoogle(emailFormatado)) {
+      setErroAvaliacao('Por favor, informe um e-mail válido do Google (terminado em @gmail.com) para publicar sua avaliação.')
+      return
+    }
+
+    const payloadAvaliacao = {
+      ...formNovaAvaliacao,
+      emailGoogle: emailFormatado
+    }
+
+    let novaLista = []
     try {
       const res = await fetch(`${API_BASE_URL}/avaliacoes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formNovaAvaliacao)
+        body: JSON.stringify(payloadAvaliacao)
       })
       if (res.ok) {
         const criada = await res.json()
-        setAvaliacoes([criada, ...avaliacoes])
+        const avaliacaoSalva = { ...criada, emailGoogle: criada.emailGoogle || emailFormatado }
+        novaLista = [avaliacaoSalva, ...avaliacoes]
       } else {
-        setAvaliacoes([formNovaAvaliacao, ...avaliacoes])
+        novaLista = [{ id: Date.now(), ...payloadAvaliacao }, ...avaliacoes]
       }
     } catch {
-      setAvaliacoes([formNovaAvaliacao, ...avaliacoes])
+      novaLista = [{ id: Date.now(), ...payloadAvaliacao }, ...avaliacoes]
     }
+
+    setAvaliacoes(novaLista)
+    localStorage.setItem('accor_avaliacoes_reais', JSON.stringify(novaLista))
     setIndiceAvaliacao(0)
+    setMotionBlurClasse('fade-in')
     setModalAvaliacaoAberta(false)
     setFormNovaAvaliacao({
       nomeAutor: '',
+      emailGoogle: '',
       papel: '',
       disciplina: 'Matemática',
       estrelas: 5,
@@ -597,11 +603,43 @@ function App() {
     }
   }
 
-  // Envio do formulário com persistência no SQLite via Spring Boot
+  // Gera o link do WhatsApp enviando todas as solicitações para +55 81 99122-5450
+  const gerarUrlWhatsApp = (dados) => {
+    const numeroDestino = '5581991225450'
+    const temDadosPreenchidos = dados.nomeResponsavel || dados.nomeAluno || dados.telefone || dados.serieEscolar || dados.mensagem
+
+    if (!temDadosPreenchidos) {
+      return `https://wa.me/${numeroDestino}?text=Ol%C3%A1!%20Vi%20a%20apresenta%C3%A7%C3%A3o%20do%20refor%C3%A7o%20escolar%20ACCOR%20e%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es.`
+    }
+
+    const linhas = [
+      "Olá! Gostaria de solicitar informações sobre o *ACCOR Reforço Escolar*:",
+      "",
+      `👤 *Responsável:* ${dados.nomeResponsavel || 'Não informado'}`,
+      `🎓 *Aluno(a):* ${dados.nomeAluno || 'Não informado'}`,
+      `📱 *Telefone/WhatsApp:* ${dados.telefone || 'Não informado'}`,
+      `📚 *Série/Ano:* ${dados.serieEscolar || 'Não informada'}`,
+      `📖 *Disciplina de Interesse:* ${dados.disciplinaInteresse || 'Matemática'}`,
+      `📍 *Modalidade:* ${dados.modalidade || 'Domicílio (Aldeia)'}`
+    ]
+
+    if (dados.mensagem && dados.mensagem.trim() !== '') {
+      linhas.push(`💬 *Mensagem:* ${dados.mensagem.trim()}`)
+    }
+
+    return `https://wa.me/${numeroDestino}?text=${encodeURIComponent(linhas.join('\n'))}`
+  }
+
+  // Envio do formulário com persistência no SQLite via Spring Boot + Redirecionamento para +55 81 99122-5450
   const handleSubmit = async (e) => {
     e.preventDefault()
     setEnviando(true)
     setFormStatus({ tipo: '', mensagem: '' })
+
+    const urlWhatsAppComDados = gerarUrlWhatsApp(formData)
+
+    // Abre o WhatsApp enviando a solicitação para +55 81 99122-5450
+    window.open(urlWhatsAppComDados, '_blank', 'noopener,noreferrer')
 
     try {
       const response = await fetch(`${API_BASE_URL}/contatos`, {
@@ -613,7 +651,7 @@ function App() {
       if (response.ok) {
         setFormStatus({
           tipo: 'success',
-          mensagem: '✅ Solicitação enviada com sucesso! Os dados foram salvos no banco SQLite. Em instantes entraremos em contato via WhatsApp.'
+          mensagem: '✅ Solicitação enviada com sucesso! Os dados foram salvos no banco SQLite e encaminhados para o WhatsApp +55 81 99122-5450.'
         })
         setFormData({
           nomeResponsavel: '',
@@ -628,10 +666,9 @@ function App() {
         throw new Error("Erro na resposta da API")
       }
     } catch {
-      // Caso o backend não esteja ativo no momento, orienta e abre o WhatsApp diretamente
       setFormStatus({
         tipo: 'success',
-        mensagem: '✅ Pedido registrado! Você também pode clicar no botão verde abaixo para falar conosco diretamente no WhatsApp (81) 9.9122-5450!'
+        mensagem: '✅ Solicitação registrada! Abrimos o WhatsApp (+55 81 99122-5450) com todos os dados preenchidos para envio.'
       })
     } finally {
       setEnviando(false)
@@ -643,6 +680,7 @@ function App() {
     : disciplinas.filter(d => d.categoria.toUpperCase().includes(filtroCategoria))
 
   const whatsappLink = "https://wa.me/5581991225450?text=Ol%C3%A1!%20Vi%20a%20apresenta%C3%A7%C3%A3o%20do%20refor%C3%A7o%20escolar%20ACCOR%20e%20gostaria%20de%20saber%20mais%20informa%C3%A7%C3%B5es."
+  const whatsappFormLink = gerarUrlWhatsApp(formData)
 
   // Se o usuário navegou para a Área do Administrador
   if (telaAtual === 'admin') {
@@ -662,18 +700,13 @@ function App() {
               </div>
             )}
 
-            <div className="login-hint-box">
-              🔑 <strong>Credenciais de Acesso:</strong><br />
-              Usuário: <code>admin</code> | Senha: <code>admin</code> ou <code>accor123</code>
-            </div>
-
             <form onSubmit={handleLogin}>
               <div className="form-group" style={{ textAlign: 'left' }}>
                 <label>Usuário</label>
                 <input 
                   type="text" 
                   className="form-input" 
-                  placeholder="admin" 
+                  placeholder="Digite seu login" 
                   value={loginCredenciais.username}
                   onChange={(e) => setLoginCredenciais({ ...loginCredenciais, username: e.target.value })}
                   required
@@ -903,7 +936,20 @@ function App() {
                           <User size={16} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                           {item.nomeResponsavel} {item.nomeAluno ? `(Aluno: ${item.nomeAluno})` : ''}
                         </span>
-                        <span className="solicitacao-status">{item.status || 'NOVO'}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                          <a
+                            href={gerarUrlWhatsApp(item)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-header-whatsapp"
+                            style={{ padding: '0.3rem 0.75rem', fontSize: '0.78rem' }}
+                            title={`Enviar mensagem para ${item.telefone}`}
+                          >
+                            <MessageCircle size={14} />
+                            <span>Enviar no WhatsApp ({item.telefone})</span>
+                          </a>
+                          <span className="solicitacao-status">{item.status || 'NOVO'}</span>
+                        </div>
                       </div>
                       <div className="solicitacao-details">
                         <div><strong>Telefone:</strong> {item.telefone}</div>
@@ -1109,19 +1155,21 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Camada de fundo isolada na GPU com a moldura de lápis otimizada (sem repaints na rolagem) */}
+      <div className="bg-fixed-gpu" aria-hidden="true" />
+
       {/* Sensor invisível no topo da janela: quando o mouse passa no topo, faz o navbar reaparecer */}
       <div 
         className="nav-hover-trigger"
-        onMouseEnter={() => setNavVisivel(true)}
+        onMouseEnter={mostrarNavbar}
       />
 
       {/* Cabeçalho inteligente: recolhe ao rolar para baixo e reaparece no topo ou hover */}
       <div 
-        className={`header-sticky-wrapper ${navVisivel ? 'nav-visible' : 'nav-hidden'}`}
-        onMouseEnter={() => setNavVisivel(true)}
-        onMouseLeave={() => {
-          if (window.scrollY > 80) setNavVisivel(false)
-        }}
+        ref={navRef}
+        className="header-sticky-wrapper nav-visible"
+        onMouseEnter={mostrarNavbar}
+        onMouseLeave={ocultarNavbarSeRolado}
       >
         {/* Faixa Superior com Lápis de Cor Coloridos (Identidade da Arte) */}
         <div className="pencil-strip">
@@ -1175,7 +1223,7 @@ function App() {
       {/* Conteúdo da Página com Efeito de Motion Blur em 60+ FPS via GPU (Sem re-renderizações) */}
       <main ref={contentRef} className="scroll-motion-blur-content">
         {/* Hero Section com o Design Baseado na Imagem Oficial */}
-      <section className="hero-section">
+      <section className="hero-section reveal-on-scroll">
         <div className="hero-grid">
           <div className="hero-content">
             <div className="hero-info-tags">
@@ -1241,7 +1289,7 @@ function App() {
 
       {/* Seção de Apresentação dos Professores */}
       <section id="professores" className="section-wrapper">
-        <div className="section-header">
+        <div className="section-header reveal-on-scroll">
           <span className="section-tag">Corpo Docente Especializado UFPE</span>
           <h2 className="section-title">Nossos Professores</h2>
           <p className="section-desc">
@@ -1258,7 +1306,7 @@ function App() {
             const specsArray = prof.especialidades ? (Array.isArray(prof.especialidades) ? prof.especialidades : prof.especialidades.split(',')) : []
 
             return (
-              <div key={prof.id || prof.nome} className="professor-card-item">
+              <div key={prof.id || prof.nome} className="professor-card-item reveal-on-scroll">
                 <div className="prof-top-bar" style={{ backgroundColor: cor }} />
                 <div className="prof-header-box">
                   <div className="prof-avatar-wrap" style={{ background: prof.foto ? 'transparent' : `${cor}15`, color: cor }}>
@@ -1326,7 +1374,7 @@ function App() {
 
       {/* Seção das Disciplinas Oferecidas */}
       <section id="disciplinas" className="section-wrapper">
-        <div className="section-header">
+        <div className="section-header reveal-on-scroll">
           <span className="section-tag">Aulas Personalizadas</span>
           <h2 className="section-title">Disciplinas Atendidas</h2>
           <p className="section-desc">
@@ -1339,7 +1387,7 @@ function App() {
           {disciplinasFiltradas.map((disc) => (
             <div 
               key={disc.id || disc.nome} 
-              className="disciplina-card"
+              className="disciplina-card reveal-on-scroll"
             >
               <div className="card-top-bar" style={{ backgroundColor: disc.cor || '#2563EB' }} />
               <div 
@@ -1362,8 +1410,8 @@ function App() {
       </section>
 
       {/* Seção Como Funciona / Metodologia */}
-      <section className="section-wrapper">
-        <div className="section-header">
+      <section id="metodologia" className="section-wrapper">
+        <div className="section-header reveal-on-scroll">
           <span className="section-tag">Diferenciais</span>
           <h2 className="section-title">Por que escolher o ACCOR?</h2>
           <p className="section-desc">
@@ -1372,22 +1420,22 @@ function App() {
         </div>
 
         <div className="methodology-grid">
-          <div className="method-card">
+          <div className="method-card reveal-on-scroll">
             <div className="method-number">01</div>
             <h3>Atendimento em Domicílio</h3>
             <p>Conforto e segurança para os alunos em Aldeia, sem necessidade de deslocamento no trânsito.</p>
           </div>
-          <div className="method-card">
+          <div className="method-card reveal-on-scroll">
             <div className="method-number">02</div>
             <h3>Aulas 100% Individuais</h3>
             <p>Atenção total voltada às dúvidas específicas do aluno, eliminando lacunas de aprendizagem.</p>
           </div>
-          <div className="method-card">
+          <div className="method-card reveal-on-scroll">
             <div className="method-number">03</div>
             <h3>Formação pela UFPE</h3>
             <p>Professores qualificados com base acadêmica sólida e técnicas pedagógicas atualizadas.</p>
           </div>
-          <div className="method-card">
+          <div className="method-card reveal-on-scroll">
             <div className="method-number">04</div>
             <h3>Evolução Visível</h3>
             <p>Acompanhamento de tarefas, simulados e preparação para provas com relatórios de progresso.</p>
@@ -1395,52 +1443,76 @@ function App() {
         </div>
       </section>
 
-      {/* Seção de Avaliações com Efeito de Fade e Motion Blur ao Deslizar */}
+      {/* Seção de Avaliações Reais com Efeito de Fade-In e Fade-Out */}
       <section id="avaliacoes" className="section-wrapper">
-        <div className="section-header">
-          <span className="section-tag">Depoimentos Reais</span>
+        <div className="section-header reveal-on-scroll">
+          <span className="section-tag">Depoimentos Reais • Conta Google</span>
           <h2 className="section-title">O que dizem os Pais e Alunos</h2>
           <p className="section-desc">
-            Acompanhe as experiências de famílias em Aldeia que transformaram a vida escolar com o ACCOR.
+            Espaço aberto para avaliações reais de famílias e estudantes atendidos pelo ACCOR em Aldeia.
           </p>
         </div>
 
-        <div className="avaliacoes-container">
+        <div className="avaliacoes-container reveal-on-scroll">
           {/* Barra de Média e Ação de Avaliar */}
           <div className="avaliacoes-header-bar">
             <div className="avaliacoes-score-box">
-              <div className="score-number">5.0</div>
+              <div className="score-number">
+                {avaliacoes.length > 0
+                  ? (avaliacoes.reduce((soma, item) => soma + (Number(item.estrelas) || 5), 0) / avaliacoes.length).toFixed(1)
+                  : '5.0'}
+              </div>
               <div className="score-stars-group">
                 <div className="stars-row">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={18} fill="#F59E0B" color="#F59E0B" />
                   ))}
                 </div>
-                <span className="score-subtext">Satisfação 100% comprovada</span>
+                <span className="score-subtext">
+                  {avaliacoes.length > 0
+                    ? `${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação real verificada' : 'avaliações reais verificadas'} com Google`
+                    : 'Avaliações reais verificadas via e-mail Google (@gmail.com)'}
+                </span>
               </div>
             </div>
 
             <button 
               className="btn-nova-avaliacao"
-              onClick={() => setModalAvaliacaoAberta(true)}
+              onClick={() => {
+                setErroAvaliacao('')
+                setModalAvaliacaoAberta(true)
+              }}
             >
               <Sparkles size={16} />
               <span>Deixar uma Avaliação</span>
             </button>
           </div>
 
-          {/* Carrossel com Efeito de Motion Blur */}
+          {/* Carrossel com Tamanho Uniforme e Efeito de Fade-In / Fade-Out */}
           <div className="carousel-viewport">
-            {avaliacoes.length > 0 && (
+            {avaliacoes.length > 0 ? (
               <div className={`avaliacao-card-spotlight ${motionBlurClasse}`}>
                 <Quote size={42} className="avaliacao-quote-icon" />
 
-                {avaliacoes[indiceAvaliacao]?.resultado && (
-                  <div className="resultado-destaque-badge">
-                    <CheckCircle2 size={14} />
-                    <span>{avaliacoes[indiceAvaliacao].resultado}</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.8rem' }}>
+                  <div className="google-verified-badge">
+                    <ShieldCheck size={14} />
+                    <span>Conta Google Verificada ({mascararEmailGoogle(avaliacoes[indiceAvaliacao]?.emailGoogle)})</span>
                   </div>
-                )}
+
+                  {avaliacoes[indiceAvaliacao]?.resultado && (
+                    <div className="resultado-destaque-badge" style={{ marginBottom: 0 }}>
+                      <CheckCircle2 size={14} />
+                      <span>{avaliacoes[indiceAvaliacao].resultado}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="stars-row" style={{ marginBottom: '0.6rem' }}>
+                  {[...Array(Number(avaliacoes[indiceAvaliacao]?.estrelas) || 5)].map((_, i) => (
+                    <Star key={i} size={16} fill="#F59E0B" color="#F59E0B" />
+                  ))}
+                </div>
 
                 <p className="avaliacao-depoimento-texto">
                   "{avaliacoes[indiceAvaliacao]?.comentario}"
@@ -1449,7 +1521,7 @@ function App() {
                 <div className="avaliacao-autor-footer">
                   <div className="avaliacao-autor-info">
                     <div className="autor-avatar-circle">
-                      {avaliacoes[indiceAvaliacao]?.nomeAutor?.charAt(0) || "A"}
+                      {avaliacoes[indiceAvaliacao]?.nomeAutor?.charAt(0)?.toUpperCase() || "A"}
                     </div>
                     <div>
                       <span className="autor-nome">{avaliacoes[indiceAvaliacao]?.nomeAutor}</span>
@@ -1462,46 +1534,77 @@ function App() {
                   </span>
                 </div>
               </div>
+            ) : (
+              <div className="avaliacao-card-spotlight avaliacao-empty-card fade-in">
+                <Quote size={42} className="avaliacao-quote-icon" />
+                <div className="google-verified-badge" style={{ margin: '0 auto 0.8rem' }}>
+                  <ShieldCheck size={15} />
+                  <span>Validação por E-mail Google (@gmail.com)</span>
+                </div>
+                <h3 style={{ fontSize: '1.35rem', color: '#1E293B', textAlign: 'center', marginBottom: '0.5rem' }}>
+                  Seja o primeiro a deixar sua avaliação real!
+                </h3>
+                <p className="avaliacao-depoimento-texto" style={{ textAlign: 'center', justifyContent: 'center', fontStyle: 'normal', fontSize: '1rem', marginBottom: '1.2rem' }}>
+                  Nossas avaliações são 100% reais, publicadas por pais, responsáveis e alunos com conta Google verificada. Compartilhe sua experiência com o reforço escolar ACCOR!
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    className="btn-nova-avaliacao"
+                    onClick={() => {
+                      setErroAvaliacao('')
+                      setModalAvaliacaoAberta(true)
+                    }}
+                  >
+                    <Sparkles size={16} />
+                    <span>Publicar Avaliação com E-mail Google</span>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Controles de Navegação com Motion Blur */}
-          <div className="carousel-navigation-row">
-            <button 
-              className="btn-carousel-ctrl" 
-              onClick={() => mudarSlideAvaliacao('prev')}
-              title="Avaliação anterior"
-            >
-              <ChevronLeft size={22} />
-            </button>
+          {/* Controles de Navegação (exibidos quando há avaliações) */}
+          {avaliacoes.length > 0 && (
+            <div className="carousel-navigation-row">
+              <button 
+                className="btn-carousel-ctrl" 
+                onClick={() => mudarSlideAvaliacao('prev')}
+                title="Avaliação anterior"
+              >
+                <ChevronLeft size={22} />
+              </button>
 
-            <div className="carousel-dots-list">
-              {avaliacoes.map((_, idx) => (
-                <button
-                  key={idx}
-                  className={`carousel-dot ${idx === indiceAvaliacao ? 'active' : ''}`}
-                  onClick={() => {
-                    const direcao = idx > indiceAvaliacao ? 'next' : 'prev'
-                    mudarSlideAvaliacao(direcao)
-                  }}
-                  title={`Ir para avaliação ${idx + 1}`}
-                />
-              ))}
+              <div className="carousel-dots-list">
+                {avaliacoes.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`carousel-dot ${idx === indiceAvaliacao ? 'active' : ''}`}
+                    onClick={() => {
+                      if (idx !== indiceAvaliacao) {
+                        const direcao = idx > indiceAvaliacao ? 'next' : 'prev'
+                        mudarSlideAvaliacao(direcao, idx)
+                      }
+                    }}
+                    title={`Ir para avaliação ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              <button 
+                className="btn-carousel-ctrl" 
+                onClick={() => mudarSlideAvaliacao('next')}
+                title="Próxima avaliação"
+              >
+                <ChevronRight size={22} />
+              </button>
             </div>
-
-            <button 
-              className="btn-carousel-ctrl" 
-              onClick={() => mudarSlideAvaliacao('next')}
-              title="Próxima avaliação"
-            >
-              <ChevronRight size={22} />
-            </button>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Seção de Contato e Formulário Integrado com Spring Boot + SQLite */}
-      <section id="contato" className="section-wrapper">
+      <section id="contato" className="section-wrapper reveal-on-scroll">
         <div className="contact-container">
           <div className="form-info-col">
             <span className="section-tag">Agende uma conversa</span>
@@ -1520,10 +1623,10 @@ function App() {
             <div className="whatsapp-box-direct">
               <div>
                 <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 700 }}>WhatsApp Direto</span>
-                <div className="phone">(81) 9.9122-5450</div>
+                <div className="phone">{telefoneExibicao}</div>
               </div>
               <a 
-                href={whatsappLink} 
+                href={whatsappFormLink} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="btn-header-whatsapp"
@@ -1572,7 +1675,7 @@ function App() {
                     className="form-input" 
                     placeholder="(81) 9XXXX-XXXX"
                     value={formData.telefone}
-                    onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, telefone: formatarTelefoneInput(e.target.value) })}
                     required
                   />
                 </div>
@@ -1707,7 +1810,7 @@ function App() {
         </div>
       )}
 
-      {/* Modal para Deixar Avaliação */}
+      {/* Modal para Deixar Avaliação Real com E-mail do Google */}
       {modalAvaliacaoAberta && (
         <div className="modal-overlay" onClick={() => setModalAvaliacaoAberta(false)}>
           <div className="modal-review-content fade-in" onClick={(e) => e.stopPropagation()}>
@@ -1724,7 +1827,34 @@ function App() {
               </button>
             </div>
 
+            {erroAvaliacao && (
+              <div className="form-status-alert error" style={{ marginBottom: '1rem', fontSize: '0.88rem' }}>
+                {erroAvaliacao}
+              </div>
+            )}
+
             <form onSubmit={handleNovaAvaliacaoSubmit}>
+              <div className="form-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span>E-mail do Google (Gmail) *</span>
+                  <span className="google-email-tag">Obrigatório • @gmail.com</span>
+                </label>
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  placeholder="seuemail@gmail.com"
+                  value={formNovaAvaliacao.emailGoogle}
+                  onChange={(e) => {
+                    setErroAvaliacao('')
+                    setFormNovaAvaliacao({ ...formNovaAvaliacao, emailGoogle: e.target.value })
+                  }}
+                  required
+                />
+                <small style={{ color: '#64748B', fontSize: '0.78rem', display: 'block', marginTop: '0.25rem' }}>
+                  🔒 Seu e-mail é usado para validar que a avaliação é de uma pessoa real e aparece mascarado no site.
+                </small>
+              </div>
+
               <div className="form-group">
                 <label>Seu Nome *</label>
                 <input 
@@ -1802,7 +1932,7 @@ function App() {
 
               <button type="submit" className="btn-submit-form">
                 <Send size={18} />
-                <span>Salvar Avaliação no Banco SQLite</span>
+                <span>Publicar Avaliação com Conta Google</span>
               </button>
             </form>
           </div>

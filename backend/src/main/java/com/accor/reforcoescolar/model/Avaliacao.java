@@ -16,6 +16,7 @@ public class Avaliacao {
     private Long id;
 
     private String nomeAutor;
+    private String emailGoogle; // E-mail Google (@gmail.com) obrigatório para validação de pessoa real
     private String papel; // Ex: Mãe do Lucas (8º Ano) • Aldeia
     private String disciplina;
     private int estrelas;
@@ -28,9 +29,10 @@ public class Avaliacao {
         this.estrelas = 5;
     }
 
-    public Avaliacao(String nomeAutor, String papel, String disciplina, int estrelas, String comentario, String resultado) {
+    public Avaliacao(String nomeAutor, String emailGoogle, String papel, String disciplina, int estrelas, String comentario, String resultado) {
         this();
         this.nomeAutor = nomeAutor;
+        this.emailGoogle = emailGoogle;
         this.papel = papel;
         this.disciplina = disciplina;
         this.estrelas = estrelas;
@@ -52,6 +54,14 @@ public class Avaliacao {
 
     public void setNomeAutor(String nomeAutor) {
         this.nomeAutor = nomeAutor;
+    }
+
+    public String getEmailGoogle() {
+        return emailGoogle;
+    }
+
+    public void setEmailGoogle(String emailGoogle) {
+        this.emailGoogle = emailGoogle;
     }
 
     public String getPapel() {

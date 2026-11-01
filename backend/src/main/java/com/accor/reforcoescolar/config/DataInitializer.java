@@ -45,52 +45,12 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Disciplinas cadastradas no banco SQLite com sucesso!");
         }
 
-        if (avaliacaoRepository.count() == 0) {
-            List<Avaliacao> avaliacoes = Arrays.asList(
-                new Avaliacao(
-                    "Patrícia Albuquerque",
-                    "Mãe do Lucas (8º ano) • Aldeia",
-                    "Matemática e Física",
-                    5,
-                    "O Lucas tinha pavor das provas de matemática e travava em equações. Com a paciência e a didática maravilhosa da professora, a nota dele subiu de 4,5 para 9,2! O atendimento em domicílio aqui em Aldeia facilitou demais a nossa rotina.",
-                    "Nota subiu de 4,5 para 9,2 no bimestre"
-                ),
-                new Avaliacao(
-                    "Carlos Eduardo Valença",
-                    "Pai da Sofia (3º ano Médio)",
-                    "Química e Biologia",
-                    5,
-                    "Excelente profissional! Muito pontual, dedicada e com domínio total dos conteúdos exigidos pelo SSA e ENEM. A Sofia ganhou muito mais segurança e conquistou a aprovação.",
-                    "Aprovada com nota 940 no SSA/ENEM"
-                ),
-                new Avaliacao(
-                    "Renata Meireles",
-                    "Mãe do Bernardo (6º ano) • Aldeia",
-                    "Português e Redação",
-                    5,
-                    "Meu filho tinha muita dificuldade com interpretação e construção de textos. As aulas foram lúdicas, dinâmicas e o desenvolvimento dele foi visível já nas primeiras semanas. Recomendo de olhos fechados!",
-                    "Evolução surpreendente na redação"
-                ),
-                new Avaliacao(
-                    "Mariana Cavalcanti",
-                    "Mãe da Alice (9º ano)",
-                    "Matemática e Ciências",
-                    5,
-                    "Professora extraordinária, com uma metodologia afetuosa que realmente ensina a pensar. Não é decoreba, é compreensão real da matéria. Alice hoje faz os exercícios sozinha!",
-                    "Média final 9,8 e aluna destaque"
-                ),
-                new Avaliacao(
-                    "Rodrigo Siqueira",
-                    "Pai do Matheus (1º ano Médio) • Aldeia",
-                    "Física e Matemática",
-                    5,
-                    "O acompanhamento em domicílio é o ponto alto: conforto absoluto e atenção 100% no estudante. A formação pela UFPE faz toda a diferença na metodologia de ensino.",
-                    "Recuperação imediata de rendimento"
-                )
-            );
-            avaliacaoRepository.saveAll(avaliacoes);
-            System.out.println("Avaliações cadastradas no banco SQLite com sucesso!");
-        }
+        // Remove quaisquer avaliações de exemplo antigas que não possuam e-mail Google real vinculado
+        avaliacaoRepository.findAll().forEach(av -> {
+            if (av.getEmailGoogle() == null || av.getEmailGoogle().trim().isEmpty()) {
+                avaliacaoRepository.deleteById(av.getId());
+            }
+        });
 
         if (professorRepository.count() == 0) {
             List<Professor> professores = Arrays.asList(
@@ -106,13 +66,13 @@ public class DataInitializer implements CommandLineRunner {
                 ),
                 new Professor(
                     "Eduardo",
-                    "Professor de Exatas",
-                    "Ciências Exatas",
-                    "",
-                    "Especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares e vestibulares.",
-                    "Exatas & Vestibulares",
+                    "Professor de Exatas • Medicina UFPE",
+                    "Ciências Exatas & Natureza",
+                    "/eduardo.jpg",
+                    "Estudante de Medicina na UFPE, é especialista em desmistificar números e cálculos complexos. Didática prática com foco em resolução guiada de exercícios sem decoreba, preparando para simulados, provas escolares, SSA e ENEM.",
+                    "Medicina UFPE • Exatas",
                     "Matemática, Física, Química, SSA & ENEM",
-                    "Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio e SSA, Recuperação rápida de base"
+                    "Estudante de Medicina na UFPE, Resolução passo a passo de listas de exercícios, Foco intensivo para provas do colégio, SSA e ENEM"
                 ),
                 new Professor(
                     "Gabriell",

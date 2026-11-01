@@ -35,17 +35,17 @@ public class InfoController {
             ),
             new ProfessorDTO(
                 "Eduardo",
-                "Professor de Exatas",
+                "Professor de Exatas • Medicina UFPE",
                 "Matemática, Física & Química",
-                "/eduardo-avatar.jpg",
-                "Especialista em transformar o 'medo de contas' em compreensão lógica e intuitiva. Foco absoluto em resolução guiada passo a passo, preparação para simulados, provas escolares, SSA e ENEM sem decoreba.",
-                "Exatas & Vestibulares",
+                "/eduardo.jpg",
+                "Estudante de Medicina na UFPE, é especialista em transformar o 'medo de contas' em compreensão lógica e intuitiva. Foco absoluto em resolução guiada passo a passo, preparação para simulados, provas escolares, SSA e ENEM sem decoreba.",
+                "Medicina UFPE • Exatas",
                 Arrays.asList("Matemática", "Física", "Química", "Álgebra", "Geometria"),
                 Arrays.asList(
+                    "Estudante de Medicina na UFPE",
                     "Desmistificação de fórmulas e cálculos complexos",
                     "Treinamento intensivo de exercícios e resolução guiada",
-                    "Preparação estratégica para SSA e ENEM",
-                    "Recuperação rápida de notas e base em exatas"
+                    "Preparação estratégica para SSA e ENEM"
                 )
             ),
             new ProfessorDTO(
