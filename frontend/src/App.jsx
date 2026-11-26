@@ -357,13 +357,23 @@ function App() {
     return Boolean(res?.ok && tipo.includes('application/json'))
   }
 
-  // Gera hash SHA-256 no navegador para autenticação segura de contingência sem expor senha em texto puro
+  // Gera hash no navegador para autenticação segura de contingência (funciona em HTTPS e HTTP)
   const gerarSha256Hex = async (texto) => {
-    const bytes = new TextEncoder().encode(texto)
-    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
-    return Array.from(new Uint8Array(hashBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')
+    if (globalThis.crypto?.subtle) {
+      const bytes = new TextEncoder().encode(texto)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
+      return Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    }
+    let h1 = 0x811c9dc5
+    let h2 = 0x01000193
+    for (let i = 0; i < texto.length; i++) {
+      const c = texto.charCodeAt(i)
+      h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0
+      h2 = Math.imul(h2 ^ (c + i), 0x811c9dc5) >>> 0
+    }
+    return `fnv-${h1.toString(16)}-${h2.toString(16)}`
   }
 
   // Envia dados também para o Netlify Forms (quando hospedado na Netlify)
@@ -524,7 +534,9 @@ function App() {
     const hashDigitado = await gerarSha256Hex(`${u}:${p}`)
     const hashesValidos = [
       '678e651c3ea6e638047227171ad9faced6a2666fca406fc354c554b4b19bc907',
-      '1d419009a5251774b0a1874612162c70b23342f9917f84382338f7316a25da0e'
+      '1d419009a5251774b0a1874612162c70b23342f9917f84382338f7316a25da0e',
+      'fnv-bc49065a-d0c1ff59',
+      'fnv-450b603b-6c40b186'
     ]
 
     if (hashesValidos.includes(hashDigitado)) {
@@ -2143,7 +2155,6 @@ function App() {
               <li><CheckCircle2 color="#16A34A" size={20} /> Atendimento domiciliar em Aldeia e região</li>
               <li><CheckCircle2 color="#16A34A" size={20} /> Horários flexíveis de segunda a sábado</li>
               <li><CheckCircle2 color="#16A34A" size={20} /> Planos especiais mensais ou aulas pontuais</li>
-              <li><ShieldCheck color="#2563EB" size={20} /> Backend Spring Boot com banco SQLite ativo</li>
             </ul>
 
             <div className="whatsapp-box-direct">
@@ -2265,7 +2276,7 @@ function App() {
                 disabled={enviando}
               >
                 <Send size={18} />
-                {enviando ? "Gravando no Banco SQLite..." : "Enviar Solicitação de Reforço"}
+                {enviando ? "Enviando Solicitação..." : "Enviar Solicitação de Reforço"}
               </button>
             </form>
           </div>
@@ -2592,7 +2603,7 @@ function App() {
           <p>Atendimento em domicílio em Aldeia | Professores especializados pela UFPE</p>
           <p>WhatsApp: (81) 9.9122-5450</p>
           <div className="footer-copy">
-            Desenvolvido com carinho para o projeto de reforço escolar • React.js + Spring Boot & SQLite
+            © {new Date().getFullYear()} ACCOR Reforço Escolar • Todos os direitos reservados
           </div>
         </div>
       </footer>
