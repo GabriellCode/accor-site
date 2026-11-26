@@ -19,28 +19,28 @@ import {
   User, 
   ShieldCheck,
   Database,
-  Award,
-  Heart,
   Star,
   ChevronLeft,
   ChevronRight,
   Quote,
   Code,
-  Cpu,
-  Terminal,
   Lock,
   Edit,
   Trash2,
   Plus,
   LogOut,
   ArrowLeft,
-  Settings,
+  ArrowUp,
   X
 } from 'lucide-react'
 import './App.css'
 
-// URL base da API do backend Spring Boot
-const API_BASE_URL = 'http://localhost:8080/api'
+// URL base da API: usa VITE_API_URL em produção (Hostinger) ou localhost:8080 em desenvolvimento local
+const API_BASE_URL = import.meta.env.VITE_API_URL || (
+  typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8080/api'
+    : '/api'
+)
 
 // Dados padrão de contingência caso o backend esteja iniciando
 const DEFAULT_DISCIPLINAS = [
@@ -99,16 +99,37 @@ function App() {
   // Controle de Navegação entre Site Público e Área de Admin
   const [telaAtual, setTelaAtual] = useState('site')
   const [adminAutenticado, setAdminAutenticado] = useState(() => {
-    return localStorage.getItem('accor_admin_auth') === 'true'
+    return localStorage.getItem('accor_admin_auth') === 'true' && Boolean(localStorage.getItem('accor_admin_token'))
   })
   const [loginCredenciais, setLoginCredenciais] = useState({ username: '', password: '' })
   const [loginErro, setLoginErro] = useState('')
   const [adminTab, setAdminTab] = useState('professores')
 
-  const [disciplinas, setDisciplinas] = useState(DEFAULT_DISCIPLINAS)
-  const [professores, setProfessores] = useState(DEFAULT_PROFESSORES)
-  const [filtroCategoria, setFiltroCategoria] = useState('TODAS')
-  const [solicitacoes, setSolicitacoes] = useState([])
+  const [disciplinas, setDisciplinas] = useState(() => {
+    try {
+      const salvas = localStorage.getItem('accor_disciplinas_local')
+      return salvas ? JSON.parse(salvas) : DEFAULT_DISCIPLINAS
+    } catch {
+      return DEFAULT_DISCIPLINAS
+    }
+  })
+  const [professores, setProfessores] = useState(() => {
+    try {
+      const salvos = localStorage.getItem('accor_professores_local')
+      return salvos ? JSON.parse(salvos) : DEFAULT_PROFESSORES
+    } catch {
+      return DEFAULT_PROFESSORES
+    }
+  })
+  const [filtroCategoria] = useState('TODAS')
+  const [solicitacoes, setSolicitacoes] = useState(() => {
+    try {
+      const salvas = localStorage.getItem('accor_solicitacoes_local')
+      return salvas ? JSON.parse(salvas) : []
+    } catch {
+      return []
+    }
+  })
   const [modalAdminAberto, setModalAdminAberto] = useState(false)
   const [carregandoAdmin, setCarregandoAdmin] = useState(false)
 
@@ -147,20 +168,60 @@ function App() {
   const [motionBlurClasse, setMotionBlurClasse] = useState('fade-in')
   const [modalAvaliacaoAberta, setModalAvaliacaoAberta] = useState(false)
   const [erroAvaliacao, setErroAvaliacao] = useState('')
-  const [formNovaAvaliacao, setFormNovaAvaliacao] = useState({
-    nomeAutor: '',
-    emailGoogle: '',
-    papel: '',
-    disciplina: 'Matemática',
-    estrelas: 5,
-    comentario: '',
-    resultado: ''
+  const [hoverEstrelas, setHoverEstrelas] = useState(0)
+
+  // Sessão de Identificação de E-mail para avaliar
+  const [usuarioGoogle, setUsuarioGoogle] = useState(() => {
+    try {
+      const salvo = localStorage.getItem('accor_google_user')
+      return salvo ? JSON.parse(salvo) : null
+    } catch {
+      return null
+    }
+  })
+  const [modalLoginGoogleAberto, setModalLoginGoogleAberto] = useState(false)
+  const [erroLoginGoogle, setErroLoginGoogle] = useState('')
+  const [dadosLoginGoogle, setDadosLoginGoogle] = useState({
+    email: '',
+    nome: '',
+    senha: ''
+  })
+
+  const [formNovaAvaliacao, setFormNovaAvaliacao] = useState(() => {
+    try {
+      const salvo = localStorage.getItem('accor_google_user')
+      const user = salvo ? JSON.parse(salvo) : null
+      return {
+        nomeAutor: user?.nome || '',
+        emailGoogle: user?.email || '',
+        papel: '',
+        disciplina: 'Matemática',
+        estrelas: 0,
+        comentario: '',
+        resultado: ''
+      }
+    } catch {
+      return {
+        nomeAutor: '',
+        emailGoogle: '',
+        papel: '',
+        disciplina: 'Matemática',
+        estrelas: 0,
+        comentario: '',
+        resultado: ''
+      }
+    }
   })
 
   const contentRef = useRef(null)
   const navRef = useRef(null)
+  const btnTopoRef = useRef(null)
 
-  // Controle do Navbar e efeito de rolagem 100% direto no DOM (0 re-renderizações do React e 0 filtros blur pesados)
+  const voltarAoTopo = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Controle do Navbar e botão Voltar ao Topo 100% direto no DOM (0 re-renderizações do React)
   useEffect(() => {
     let ultimoScrollY = window.scrollY
     let ticking = false
@@ -170,6 +231,7 @@ function App() {
         window.requestAnimationFrame(() => {
           const scrollAtual = window.scrollY
           const navEl = navRef.current
+          const btnTopoEl = btnTopoRef.current
 
           if (navEl) {
             if (scrollAtual <= 60 || scrollAtual < ultimoScrollY - 12) {
@@ -181,6 +243,14 @@ function App() {
             }
           }
 
+          if (btnTopoEl) {
+            if (scrollAtual > 280) {
+              btnTopoEl.classList.add('visible')
+            } else {
+              btnTopoEl.classList.remove('visible')
+            }
+          }
+
           ultimoScrollY = scrollAtual
           ticking = false
         })
@@ -189,8 +259,9 @@ function App() {
     }
 
     window.addEventListener('scroll', aoRolar, { passive: true })
+    aoRolar()
     return () => window.removeEventListener('scroll', aoRolar)
-  }, [])
+  }, [telaAtual])
 
   const mostrarNavbar = () => {
     if (navRef.current) {
@@ -242,10 +313,9 @@ function App() {
 
   const [formStatus, setFormStatus] = useState({ tipo: '', mensagem: '' })
   const [enviando, setEnviando] = useState(false)
-  const [whatsappNumero, setWhatsappNumero] = useState('5581991225450')
   const [telefoneExibicao, setTelefoneExibicao] = useState('(81) 9.9122-5450')
 
-  // Formata automaticamente o telefone conforme o usuário digita (ex: (81) 99999-9999)
+  // Formata automaticamente o telefone conforme o usuário digita (ex: (81) 99999-9999) — aceita apenas números
   const formatarTelefoneInput = (valor) => {
     const apenasDigitos = valor.replace(/\D/g, '').slice(0, 11)
     if (apenasDigitos.length === 0) return ''
@@ -254,14 +324,67 @@ function App() {
     return `(${apenasDigitos.slice(0, 2)}) ${apenasDigitos.slice(2, 7)}-${apenasDigitos.slice(7)}`
   }
 
+  // Permite digitar apenas números inteiros (0-9)
+  const formatarApenasNumeros = (valor, maxDigitos = 2) => {
+    return valor.replace(/\D/g, '').slice(0, maxDigitos)
+  }
+
+  // Permite digitar apenas nota numérica (0 a 10, com ponto ou vírgula opcional, ex: 9.5 ou 10)
+  const formatarNotaNumerica = (valor) => {
+    let limpo = valor.replace(/[^0-9.,]/g, '')
+    const partes = limpo.split(/[.,]/)
+    if (partes.length > 2) {
+      limpo = `${partes[0]}.${partes.slice(1).join('')}`
+    }
+    if (limpo.length > 4) {
+      limpo = limpo.slice(0, 4)
+    }
+    const num = parseFloat(limpo.replace(',', '.'))
+    if (!isNaN(num) && num > 10) {
+      return '10'
+    }
+    return limpo
+  }
+
+  // Remove números de campos que devem conter apenas nomes/letras
+  const formatarApenasLetras = (valor) => {
+    return valor.replace(/[0-9]/g, '')
+  }
+
+  // Verifica se a resposta HTTP veio realmente em JSON da API (evita erro quando SPA fallback retorna index.html)
+  const ehRespostaJson = (res) => {
+    const tipo = res?.headers?.get('content-type') || ''
+    return Boolean(res?.ok && tipo.includes('application/json'))
+  }
+
+  // Gera hash SHA-256 no navegador para autenticação segura de contingência sem expor senha em texto puro
+  const gerarSha256Hex = async (texto) => {
+    const bytes = new TextEncoder().encode(texto)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  }
+
+  // Envia dados também para o Netlify Forms (quando hospedado na Netlify)
+  const enviarParaNetlifyForms = (nomeFormulario, campos) => {
+    try {
+      const params = new URLSearchParams({ 'form-name': nomeFormulario, ...campos })
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      }).catch(() => {})
+    } catch {
+      // Ignora em ambiente local
+    }
+  }
+
   // Busca automaticamente o número de WhatsApp oficial cadastrado no backend (/api/info)
   useEffect(() => {
     fetch(`${API_BASE_URL}/info`)
-      .then(res => res.ok ? res.json() : null)
+      .then(res => ehRespostaJson(res) ? res.json() : null)
       .then(info => {
-        if (info?.whatsapp) {
-          setWhatsappNumero(info.whatsapp.replace(/\D/g, ''))
-        }
         if (info?.telefoneFormatado) {
           setTelefoneExibicao(info.telefoneFormatado)
         }
@@ -276,82 +399,97 @@ function App() {
     '#14B8A6', '#6366F1', '#A855F7', '#D97706', '#059669'
   ]
 
-  // Carrega as disciplinas cadastradas no backend Spring Boot + SQLite
+  // Carrega as disciplinas cadastradas no backend (Spring Boot ou Netlify Function)
   useEffect(() => {
     fetch(`${API_BASE_URL}/disciplinas`)
       .then(res => {
-        if (!res.ok) throw new Error("Falha ao consultar disciplinas no backend")
+        if (!ehRespostaJson(res)) throw new Error("Usando disciplinas locais")
         return res.json()
       })
       .then(data => {
-        if (data && data.length > 0) {
-          // Mapeia adicionando cores visuais aos dados do SQLite
+        if (Array.isArray(data) && data.length > 0) {
           const cores = ['#2563EB', '#DC2626', '#9333EA', '#EA580C', '#0D9488', '#16A34A', '#D97706', '#0284C7']
           const dadosComCores = data.map((d, index) => ({
             ...d,
-            cor: cores[index % cores.length]
+            cor: d.cor || cores[index % cores.length]
           }))
           setDisciplinas(dadosComCores)
+          localStorage.setItem('accor_disciplinas_local', JSON.stringify(dadosComCores))
         }
       })
-      .catch(err => {
-        console.log("Servidor Spring Boot ainda inicializando ou rodando com dados locais padrão:", err)
-      })
+      .catch(() => {})
   }, [])
 
-  // Função para carregar contatos salvos no SQLite
+  // Monta os cabeçalhos autenticados do Administrador com o token seguro da sessão
+  const obterHeadersAdmin = (comJson = false) => {
+    const headers = {}
+    if (comJson) {
+      headers['Content-Type'] = 'application/json'
+    }
+    const token = localStorage.getItem('accor_admin_token')
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    return headers
+  }
+
+  // Função para carregar contatos salvos no banco (Spring Boot, Netlify Function ou armazenamento local)
   const carregarSolicitacoes = () => {
     setCarregandoAdmin(true)
-    fetch(`${API_BASE_URL}/contatos`)
-      .then(res => res.json())
+    fetch(`${API_BASE_URL}/contatos`, { headers: obterHeadersAdmin() })
+      .then(res => {
+        if (res.status === 401) {
+          handleLogout()
+          throw new Error('Sessão expirada')
+        }
+        if (!ehRespostaJson(res)) throw new Error('Fallback local')
+        return res.json()
+      })
       .then(data => {
-        setSolicitacoes(data)
+        if (Array.isArray(data)) {
+          setSolicitacoes(data)
+          localStorage.setItem('accor_solicitacoes_local', JSON.stringify(data))
+        }
         setCarregandoAdmin(false)
       })
       .catch(() => {
-        setSolicitacoes([])
+        try {
+          const locais = JSON.parse(localStorage.getItem('accor_solicitacoes_local') || '[]')
+          setSolicitacoes(Array.isArray(locais) ? locais : [])
+        } catch {
+          setSolicitacoes([])
+        }
         setCarregandoAdmin(false)
       })
   }
 
-  // Carrega os professores do backend SQLite
+  // Carrega os professores do backend (Spring Boot, Netlify Function ou armazenamento local)
   const carregarProfessores = () => {
     fetch(`${API_BASE_URL}/professores`)
       .then(res => {
-        if (!res.ok) throw new Error("Erro ao carregar professores")
+        if (!ehRespostaJson(res)) throw new Error("Fallback local")
         return res.json()
       })
       .then(data => {
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
           setProfessores(data)
+          localStorage.setItem('accor_professores_local', JSON.stringify(data))
         }
       })
-      .catch(() => {
-        // Mantém os professores locais se o backend estiver iniciando
-      })
+      .catch(() => {})
   }
 
   useEffect(() => {
     carregarProfessores()
   }, [])
 
-  // Autenticação do Administrador
+  // Autenticação do Administrador (Spring Boot, Netlify Functions ou Hash SHA-256 em preview estático)
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoginErro('')
 
-    const u = loginCredenciais.username.trim()
+    const u = loginCredenciais.username.trim().toLowerCase()
     const p = loginCredenciais.password.trim()
-    const credenciaisValidas = u.toLowerCase() === 'accor@2026' && (p === 'accor@2k26.!' || p === 'accor@2k26.')
-
-    if (credenciaisValidas) {
-      localStorage.setItem('accor_admin_auth', 'true')
-      setAdminAutenticado(true)
-      setLoginCredenciais({ username: '', password: '' })
-      carregarProfessores()
-      carregarSolicitacoes()
-      return
-    }
 
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -360,21 +498,54 @@ function App() {
         body: JSON.stringify({ username: u, password: p })
       })
 
-      if (res.ok) {
+      if (ehRespostaJson(res)) {
+        const data = await res.json()
+        if (data?.token) {
+          localStorage.setItem('accor_admin_token', data.token)
+        }
         localStorage.setItem('accor_admin_auth', 'true')
         setAdminAutenticado(true)
         setLoginCredenciais({ username: '', password: '' })
         carregarProfessores()
         carregarSolicitacoes()
-      } else {
+        carregarAvaliacoesDoBanco()
+        return
+      }
+
+      if (res.status === 401) {
         setLoginErro('Usuário ou senha incorretos.')
+        return
       }
     } catch {
+      // Continua para validação criptográfica SHA-256 em preview estático da Netlify
+    }
+
+    // Validação criptográfica via SHA-256 quando em preview estático (sem expor a senha no código)
+    const hashDigitado = await gerarSha256Hex(`${u}:${p}`)
+    const hashesValidos = [
+      '678e651c3ea6e638047227171ad9faced6a2666fca406fc354c554b4b19bc907',
+      '1d419009a5251774b0a1874612162c70b23342f9917f84382338f7316a25da0e'
+    ]
+
+    if (hashesValidos.includes(hashDigitado)) {
+      localStorage.setItem('accor_admin_token', `accor-admin-${hashDigitado.slice(0, 16)}`)
+      localStorage.setItem('accor_admin_auth', 'true')
+      setAdminAutenticado(true)
+      setLoginCredenciais({ username: '', password: '' })
+      carregarProfessores()
+      carregarSolicitacoes()
+      carregarAvaliacoesDoBanco()
+    } else {
       setLoginErro('Usuário ou senha incorretos.')
     }
   }
 
   const handleLogout = () => {
+    fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      headers: obterHeadersAdmin()
+    }).catch(() => {})
+    localStorage.removeItem('accor_admin_token')
     localStorage.removeItem('accor_admin_auth')
     setAdminAutenticado(false)
     setTelaAtual('site')
@@ -413,6 +584,7 @@ function App() {
 
   const salvarProfessor = async (e) => {
     e.preventDefault()
+    let novaListaProfs = professores
     try {
       const url = editandoProfId 
         ? `${API_BASE_URL}/professores/${editandoProfId}` 
@@ -421,54 +593,79 @@ function App() {
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: obterHeadersAdmin(true),
         body: JSON.stringify(profForm)
       })
 
-      if (res.ok) {
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
+
+      if (ehRespostaJson(res)) {
         const salvo = await res.json()
-        if (editandoProfId) {
-          setProfessores(professores.map(p => p.id === editandoProfId ? salvo : p))
-        } else {
-          setProfessores([...professores, salvo])
-        }
+        novaListaProfs = editandoProfId
+          ? professores.map(p => p.id === editandoProfId ? salvo : p)
+          : [...professores, salvo]
+      } else {
+        throw new Error("Salvar localmente")
       }
     } catch {
-      if (editandoProfId) {
-        setProfessores(professores.map(p => p.id === editandoProfId ? { ...p, ...profForm } : p))
-      } else {
-        setProfessores([...professores, { id: Date.now(), ...profForm }])
-      }
+      const idLocal = editandoProfId || (professores.reduce((m, p) => Math.max(m, Number(p.id) || 0), 0) + 1)
+      novaListaProfs = editandoProfId
+        ? professores.map(p => p.id === editandoProfId ? { ...p, ...profForm } : p)
+        : [...professores, { id: idLocal, ...profForm }]
     }
+    setProfessores(novaListaProfs)
+    localStorage.setItem('accor_professores_local', JSON.stringify(novaListaProfs))
     setModalProfAberto(false)
   }
 
   const excluirProfessor = async (id) => {
     if (!window.confirm("Deseja realmente excluir este professor?")) return
     try {
-      await fetch(`${API_BASE_URL}/professores/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE_URL}/professores/${id}`, {
+        method: 'DELETE',
+        headers: obterHeadersAdmin()
+      })
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
     } catch (err) {
       console.log(err)
     }
-    setProfessores(professores.filter(p => p.id !== id))
+    const atualizados = professores.filter(p => p.id !== id)
+    setProfessores(atualizados)
+    localStorage.setItem('accor_professores_local', JSON.stringify(atualizados))
   }
 
   // Gerenciamento de Disciplinas no Admin
   const salvarMateria = async (e) => {
     e.preventDefault()
+    let novaListaDisc = disciplinas
     try {
       const res = await fetch(`${API_BASE_URL}/disciplinas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: obterHeadersAdmin(true),
         body: JSON.stringify(materiaForm)
       })
-      if (res.ok) {
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
+      if (ehRespostaJson(res)) {
         const salva = await res.json()
-        setDisciplinas([...disciplinas, salva])
+        novaListaDisc = [...disciplinas, salva]
+      } else {
+        throw new Error("Salvar localmente")
       }
     } catch {
-      setDisciplinas([...disciplinas, { id: Date.now(), ...materiaForm }])
+      const idLocal = disciplinas.reduce((m, d) => Math.max(m, Number(d.id) || 0), 0) + 1
+      novaListaDisc = [...disciplinas, { id: idLocal, ...materiaForm }]
     }
+    setDisciplinas(novaListaDisc)
+    localStorage.setItem('accor_disciplinas_local', JSON.stringify(novaListaDisc))
     setModalMateriaAberto(false)
     setMateriaForm({ nome: '', categoria: 'Exatas', descricao: '', icone: 'calculator' })
   }
@@ -476,18 +673,113 @@ function App() {
   const excluirMateria = async (id) => {
     if (!window.confirm("Deseja realmente remover esta disciplina?")) return
     try {
-      await fetch(`${API_BASE_URL}/disciplinas/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE_URL}/disciplinas/${id}`, {
+        method: 'DELETE',
+        headers: obterHeadersAdmin()
+      })
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
     } catch (err) {
       console.log(err)
     }
-    setDisciplinas(disciplinas.filter(d => d.id !== id))
+    const atualizadas = disciplinas.filter(d => d.id !== id)
+    setDisciplinas(atualizadas)
+    localStorage.setItem('accor_disciplinas_local', JSON.stringify(atualizadas))
   }
 
-  // Valida se o e-mail informado pertence a uma conta Google (@gmail.com ou @googlemail.com)
+  // Exclui uma avaliação do banco SQLite e atualiza a lista e a média imediatamente
+  const excluirAvaliacaoAdmin = async (avAlvo, idxAlvo) => {
+    if (!window.confirm("Deseja realmente apagar esta avaliação?")) return
+    const atualizadas = avaliacoes.filter((av, idx) =>
+      avAlvo?.id ? av.id !== avAlvo.id : idx !== idxAlvo
+    )
+    setAvaliacoes(atualizadas)
+    setIndiceAvaliacao(0)
+    localStorage.setItem('accor_avaliacoes_reais', JSON.stringify(atualizadas))
+
+    try {
+      if (avAlvo?.id) {
+        const res = await fetch(`${API_BASE_URL}/avaliacoes/${avAlvo.id}`, {
+          method: 'DELETE',
+          headers: obterHeadersAdmin()
+        })
+        if (res.status === 401) {
+          handleLogout()
+          return
+        }
+      }
+      await carregarAvaliacoesDoBanco()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const excluirTodasAvaliacoesAdmin = async () => {
+    if (!window.confirm("Deseja apagar TODAS as avaliações do banco de dados?")) return
+    setAvaliacoes([])
+    setIndiceAvaliacao(0)
+    localStorage.setItem('accor_avaliacoes_reais', JSON.stringify([]))
+    try {
+      const res = await fetch(`${API_BASE_URL}/avaliacoes`, {
+        method: 'DELETE',
+        headers: obterHeadersAdmin()
+      })
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
+      await carregarAvaliacoesDoBanco()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const excluirSolicitacaoAdmin = async (id) => {
+    if (!window.confirm("Deseja realmente apagar esta solicitação?")) return
+    const atualizadas = solicitacoes.filter((item) => item.id !== id)
+    setSolicitacoes(atualizadas)
+    localStorage.setItem('accor_solicitacoes_local', JSON.stringify(atualizadas))
+    try {
+      if (id) {
+        const res = await fetch(`${API_BASE_URL}/contatos/${id}`, {
+          method: 'DELETE',
+          headers: obterHeadersAdmin()
+        })
+        if (res.status === 401) {
+          handleLogout()
+          return
+        }
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const excluirTodasSolicitacoesAdmin = async () => {
+    if (!window.confirm("Deseja apagar TODAS as solicitações do banco de dados?")) return
+    setSolicitacoes([])
+    localStorage.setItem('accor_solicitacoes_local', JSON.stringify([]))
+    try {
+      const res = await fetch(`${API_BASE_URL}/contatos`, {
+        method: 'DELETE',
+        headers: obterHeadersAdmin()
+      })
+      if (res.status === 401) {
+        handleLogout()
+        return
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  // Valida se o e-mail informado possui formato válido
   const validarEmailGoogle = (email) => {
     if (!email) return false
     const limpo = email.trim().toLowerCase()
-    return /^[a-z0-9._%+-]+@(gmail\.com|googlemail\.com)$/.test(limpo)
+    return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(limpo)
   }
 
   // Mascara parcialmente o e-mail Google para exibição pública segura no card (ex: bi***@gmail.com)
@@ -498,25 +790,65 @@ function App() {
     return `${usuario.slice(0, 2)}***@${dominio}`
   }
 
-  // Carrega apenas as avaliações reais salvas no backend Spring Boot + SQLite
+  // Rótulos de estrelas no padrão Google Avaliações
+  const obterRotuloEstrelasGoogle = (qtd) => {
+    switch (Number(qtd)) {
+      case 1: return '1 estrela — Ruim'
+      case 2: return '2 estrelas — Regular'
+      case 3: return '3 estrelas — Bom'
+      case 4: return '4 estrelas — Muito bom'
+      case 5: return '5 estrelas — Excelente!'
+      default: return 'Passe o mouse e clique nas estrelas para dar sua nota (1 a 5)'
+    }
+  }
+
+  // Renderiza 5 estrelas com preenchimento proporcional (estilo Google: ex. 4.5 preenche 4 inteiras e metade da 5ª)
+  const renderizarEstrelasGoogle = (notaMedia, tamanho = 18) => {
+    const nota = Math.max(0, Math.min(5, Number(notaMedia) || 0))
+    return [1, 2, 3, 4, 5].map((estrelaNum) => {
+      const percentual = Math.max(0, Math.min(1, nota - (estrelaNum - 1))) * 100
+      return (
+        <span
+          key={estrelaNum}
+          className="google-star-wrapper"
+          style={{ width: `${tamanho}px`, height: `${tamanho}px` }}
+        >
+          <Star size={tamanho} fill="#E2E8F0" color="#CBD5E1" className="google-star-bg" />
+          <span className="google-star-fill" style={{ width: `${percentual}%` }}>
+            <Star size={tamanho} fill="#F59E0B" color="#F59E0B" />
+          </span>
+        </span>
+      )
+    })
+  }
+
+  // Busca todas as avaliações reais gravadas no banco (Spring Boot ou Netlify Blobs) e atualiza o estado
+  const carregarAvaliacoesDoBanco = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/avaliacoes`, { headers: obterHeadersAdmin() })
+      if (!ehRespostaJson(res)) throw new Error("Fallback local")
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        const apenasReais = data.filter(av => av.emailGoogle && av.emailGoogle.includes('@'))
+        setAvaliacoes(apenasReais)
+        localStorage.setItem('accor_avaliacoes_reais', JSON.stringify(apenasReais))
+        return apenasReais
+      }
+    } catch {
+      // Mantém as avaliações reais salvas localmente caso o backend esteja offline
+    }
+    return null
+  }
+
+  // Carrega apenas as avaliações reais salvas no backend Spring Boot + SQLite ao iniciar
   useEffect(() => {
-    fetch(`${API_BASE_URL}/avaliacoes`)
-      .then(res => {
-        if (!res.ok) throw new Error("Erro ao buscar avaliações no backend")
-        return res.json()
-      })
-      .then(data => {
-        if (Array.isArray(data)) {
-          // Filtra apenas avaliações reais que possuem e-mail do Google vinculado
-          const apenasReais = data.filter(av => av.emailGoogle && validarEmailGoogle(av.emailGoogle))
-          setAvaliacoes(apenasReais)
-          localStorage.setItem('accor_avaliacoes_reais', JSON.stringify(apenasReais))
-        }
-      })
-      .catch(() => {
-        // Mantém as avaliações reais salvas localmente caso o backend esteja iniciando
-      })
+    carregarAvaliacoesDoBanco()
   }, [])
+
+  // Calcula a média exata de todas as avaliações cadastradas no banco
+  const mediaAvaliacoesNumero = avaliacoes.length > 0
+    ? avaliacoes.reduce((soma, item) => soma + (Number(item.estrelas) || 0), 0) / avaliacoes.length
+    : 0
 
   // Função para transição de avaliação com Fade-Out da atual e Fade-In da próxima (ou índice específico)
   const mudarSlideAvaliacao = (direcao, indiceAlvo = null) => {
@@ -535,21 +867,68 @@ function App() {
     }, 200)
   }
 
-  // Envio de nova avaliação real de pais/alunos exigindo e-mail do Google (@gmail.com)
+  // Abre o pop-up para informar o e-mail de identificação da avaliação
+  const iniciarLoginGoogle = () => {
+    setErroAvaliacao('')
+    setErroLoginGoogle('')
+    setDadosLoginGoogle({ email: usuarioGoogle?.email || formNovaAvaliacao.emailGoogle || '', nome: '', senha: '' })
+    setModalLoginGoogleAberto(true)
+  }
+
+  // Confirma o e-mail informado no pop-up e vincula ao formulário de avaliação
+  const avancarEtapaEmailGoogle = (e) => {
+    e.preventDefault()
+    setErroLoginGoogle('')
+    const emailDigitado = dadosLoginGoogle.email.trim().toLowerCase()
+    if (!validarEmailGoogle(emailDigitado)) {
+      setErroLoginGoogle('Digite um endereço de e-mail válido (ex: seuemail@dominio.com).')
+      return
+    }
+    const contaAutenticada = {
+      nome: formNovaAvaliacao.nomeAutor.trim() || emailDigitado.split('@')[0],
+      email: emailDigitado,
+      foto: ''
+    }
+    setUsuarioGoogle(contaAutenticada)
+    localStorage.setItem('accor_google_user', JSON.stringify(contaAutenticada))
+    setFormNovaAvaliacao((prev) => ({
+      ...prev,
+      emailGoogle: contaAutenticada.email
+    }))
+    setModalLoginGoogleAberto(false)
+  }
+
+  const desconectarContaGoogle = () => {
+    setUsuarioGoogle(null)
+    localStorage.removeItem('accor_google_user')
+    setFormNovaAvaliacao((prev) => ({ ...prev, emailGoogle: '' }))
+  }
+
+  // Envio de nova avaliação real de pais/alunos exigindo identificação por e-mail e nota em estrelas
   const handleNovaAvaliacaoSubmit = async (e) => {
     e.preventDefault()
     setErroAvaliacao('')
 
-    const emailFormatado = formNovaAvaliacao.emailGoogle.trim().toLowerCase()
-    if (!validarEmailGoogle(emailFormatado)) {
-      setErroAvaliacao('Por favor, informe um e-mail válido do Google (terminado em @gmail.com) para publicar sua avaliação.')
+    const emailContaLogada = (usuarioGoogle?.email || formNovaAvaliacao.emailGoogle || '').trim().toLowerCase()
+    if (!usuarioGoogle || !validarEmailGoogle(emailContaLogada)) {
+      setErroAvaliacao('Por favor, informe um e-mail válido antes de publicar sua avaliação.')
+      return
+    }
+
+    const estrelasEscolhidas = Number(formNovaAvaliacao.estrelas)
+    if (!estrelasEscolhidas || estrelasEscolhidas < 1 || estrelasEscolhidas > 5) {
+      setErroAvaliacao('Por favor, clique nas estrelas para selecionar uma nota de 1 a 5 estrelas.')
       return
     }
 
     const payloadAvaliacao = {
       ...formNovaAvaliacao,
-      emailGoogle: emailFormatado
+      nomeAutor: formNovaAvaliacao.nomeAutor.trim() || usuarioGoogle.nome,
+      estrelas: estrelasEscolhidas,
+      emailGoogle: emailContaLogada
     }
+
+    enviarParaNetlifyForms('avaliacao-reforco', payloadAvaliacao)
 
     let novaLista = []
     try {
@@ -558,15 +937,22 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payloadAvaliacao)
       })
-      if (res.ok) {
+      if (ehRespostaJson(res)) {
         const criada = await res.json()
-        const avaliacaoSalva = { ...criada, emailGoogle: criada.emailGoogle || emailFormatado }
-        novaLista = [avaliacaoSalva, ...avaliacoes]
+        const listaDoBanco = await carregarAvaliacoesDoBanco()
+        if (listaDoBanco) {
+          novaLista = listaDoBanco
+        } else {
+          const avaliacaoSalva = { ...criada, emailGoogle: criada.emailGoogle || emailContaLogada }
+          novaLista = [avaliacaoSalva, ...avaliacoes]
+        }
       } else {
-        novaLista = [{ id: Date.now(), ...payloadAvaliacao }, ...avaliacoes]
+        const idLocal = avaliacoes.reduce((m, a) => Math.max(m, Number(a.id) || 0), 0) + 1
+        novaLista = [{ id: idLocal, ...payloadAvaliacao }, ...avaliacoes]
       }
     } catch {
-      novaLista = [{ id: Date.now(), ...payloadAvaliacao }, ...avaliacoes]
+      const idLocal = avaliacoes.reduce((m, a) => Math.max(m, Number(a.id) || 0), 0) + 1
+      novaLista = [{ id: idLocal, ...payloadAvaliacao }, ...avaliacoes]
     }
 
     setAvaliacoes(novaLista)
@@ -574,12 +960,13 @@ function App() {
     setIndiceAvaliacao(0)
     setMotionBlurClasse('fade-in')
     setModalAvaliacaoAberta(false)
+    setHoverEstrelas(0)
     setFormNovaAvaliacao({
-      nomeAutor: '',
-      emailGoogle: '',
+      nomeAutor: usuarioGoogle?.nome || '',
+      emailGoogle: usuarioGoogle?.email || '',
       papel: '',
       disciplina: 'Matemática',
-      estrelas: 5,
+      estrelas: 0,
       comentario: '',
       resultado: ''
     })
@@ -641,6 +1028,9 @@ function App() {
     // Abre o WhatsApp enviando a solicitação para +55 81 99122-5450
     window.open(urlWhatsAppComDados, '_blank', 'noopener,noreferrer')
 
+    // Envia para o Netlify Forms (quando hospedado na Netlify)
+    enviarParaNetlifyForms('solicitacao-reforco', formData)
+
     try {
       const response = await fetch(`${API_BASE_URL}/contatos`, {
         method: 'POST',
@@ -648,29 +1038,38 @@ function App() {
         body: JSON.stringify(formData)
       })
 
-      if (response.ok) {
+      if (ehRespostaJson(response)) {
+        const salvo = await response.json()
+        const atualizadas = [salvo, ...solicitacoes]
+        setSolicitacoes(atualizadas)
+        localStorage.setItem('accor_solicitacoes_local', JSON.stringify(atualizadas))
         setFormStatus({
           tipo: 'success',
-          mensagem: '✅ Solicitação enviada com sucesso! Os dados foram salvos no banco SQLite e encaminhados para o WhatsApp +55 81 99122-5450.'
-        })
-        setFormData({
-          nomeResponsavel: '',
-          nomeAluno: '',
-          telefone: '',
-          serieEscolar: '',
-          disciplinaInteresse: 'Matemática',
-          modalidade: 'Domicílio (Aldeia)',
-          mensagem: ''
+          mensagem: '✅ Solicitação enviada com sucesso! Os dados foram salvos e encaminhados para o WhatsApp +55 81 99122-5450.'
         })
       } else {
-        throw new Error("Erro na resposta da API")
+        throw new Error("Fallback local")
       }
     } catch {
+      const idLocal = solicitacoes.reduce((m, s) => Math.max(m, Number(s.id) || 0), 0) + 1
+      const novoLocal = { id: idLocal, status: 'NOVO', ...formData }
+      const atualizadas = [novoLocal, ...solicitacoes]
+      setSolicitacoes(atualizadas)
+      localStorage.setItem('accor_solicitacoes_local', JSON.stringify(atualizadas))
       setFormStatus({
         tipo: 'success',
         mensagem: '✅ Solicitação registrada! Abrimos o WhatsApp (+55 81 99122-5450) com todos os dados preenchidos para envio.'
       })
     } finally {
+      setFormData({
+        nomeResponsavel: '',
+        nomeAluno: '',
+        telefone: '',
+        serieEscolar: '',
+        disciplinaInteresse: 'Matemática',
+        modalidade: 'Domicílio (Aldeia)',
+        mensagem: ''
+      })
       setEnviando(false)
     }
   }
@@ -802,6 +1201,17 @@ function App() {
               <Database size={18} />
               <span>Solicitações SQLite ({solicitacoes.length})</span>
             </button>
+
+            <button 
+              className={`admin-tab-btn ${adminTab === 'avaliacoes' ? 'active' : ''}`}
+              onClick={() => {
+                setAdminTab('avaliacoes')
+                carregarAvaliacoesDoBanco()
+              }}
+            >
+              <Star size={18} />
+              <span>Avaliações ({avaliacoes.length})</span>
+            </button>
           </div>
 
           {/* TAB 1: GESTÃO DE PROFESSORES */}
@@ -912,14 +1322,26 @@ function App() {
                     Leads e pedidos de aula enviados através do formulário do site.
                   </p>
                 </div>
-                <button 
-                  className="btn-admin-add" 
-                  style={{ background: '#2563EB' }}
-                  onClick={carregarSolicitacoes}
-                >
-                  <Database size={16} />
-                  <span>Atualizar Registros</span>
-                </button>
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <button 
+                    className="btn-admin-add" 
+                    style={{ background: '#2563EB' }}
+                    onClick={carregarSolicitacoes}
+                  >
+                    <Database size={16} />
+                    <span>Atualizar Registros</span>
+                  </button>
+                  {solicitacoes.length > 0 && (
+                    <button 
+                      className="btn-admin-del" 
+                      style={{ flex: 'initial', padding: '0.55rem 0.95rem' }}
+                      onClick={excluirTodasSolicitacoesAdmin}
+                    >
+                      <Trash2 size={16} />
+                      <span>Limpar Todas ({solicitacoes.length})</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {solicitacoes.length === 0 ? (
@@ -949,6 +1371,16 @@ function App() {
                             <span>Enviar no WhatsApp ({item.telefone})</span>
                           </a>
                           <span className="solicitacao-status">{item.status || 'NOVO'}</span>
+                          <button
+                            type="button"
+                            className="btn-admin-del"
+                            style={{ flex: 'initial', padding: '0.3rem 0.65rem', fontSize: '0.78rem' }}
+                            onClick={() => excluirSolicitacaoAdmin(item.id)}
+                            title="Apagar solicitação"
+                          >
+                            <Trash2 size={14} />
+                            <span>Apagar</span>
+                          </button>
                         </div>
                       </div>
                       <div className="solicitacao-details">
@@ -960,6 +1392,90 @@ function App() {
                       {item.mensagem && (
                         <div className="solicitacao-msg">
                           "{item.mensagem}"
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: GESTÃO DE AVALIAÇÕES */}
+          {adminTab === 'avaliacoes' && (
+            <div className="admin-card-panel">
+              <div className="admin-section-header">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0F172A' }}>Avaliações Publicadas no Site</h3>
+                  <p style={{ margin: 0, color: '#64748B', fontSize: '0.9rem' }}>
+                    {avaliacoes.length > 0
+                      ? `Média atual: ${mediaAvaliacoesNumero.toFixed(1)} estrelas (${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação cadastrada' : 'avaliações cadastradas'})`
+                      : 'Visualize e apague avaliações enviadas pelos usuários no site.'}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <button 
+                    className="btn-admin-add" 
+                    style={{ background: '#2563EB' }}
+                    onClick={carregarAvaliacoesDoBanco}
+                  >
+                    <Database size={16} />
+                    <span>Atualizar Avaliações</span>
+                  </button>
+                  {avaliacoes.length > 0 && (
+                    <button 
+                      className="btn-admin-del" 
+                      style={{ flex: 'initial', padding: '0.55rem 0.95rem' }}
+                      onClick={excluirTodasAvaliacoesAdmin}
+                    >
+                      <Trash2 size={16} />
+                      <span>Apagar Todas ({avaliacoes.length})</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {avaliacoes.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2.5rem', color: '#64748B' }}>
+                  <Star size={44} style={{ opacity: 0.35, marginBottom: '0.8rem' }} />
+                  <p>Nenhuma avaliação cadastrada no momento.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {avaliacoes.map((av, idx) => (
+                    <div key={av.id || `${av.emailGoogle}-${idx}`} className="solicitacao-item">
+                      <div className="solicitacao-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                          <span className="solicitacao-nome">
+                            <User size={16} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                            {av.nomeAutor}
+                          </span>
+                          <span className="solicitacao-status" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            ⭐ {Number(av.estrelas || 5).toFixed(1)}
+                          </span>
+                        </div>
+
+                        <button 
+                          className="btn-admin-del"
+                          style={{ flex: 'initial', padding: '0.45rem 0.85rem' }}
+                          onClick={() => excluirAvaliacaoAdmin(av, idx)}
+                          title="Apagar esta avaliação"
+                        >
+                          <Trash2 size={15} />
+                          <span>Apagar Avaliação</span>
+                        </button>
+                      </div>
+
+                      <div className="solicitacao-details">
+                        <div><strong>E-mail:</strong> {av.emailGoogle || 'Não informado'}</div>
+                        <div><strong>Relação / Série:</strong> {av.papel || 'Não informado'}</div>
+                        <div><strong>Disciplina:</strong> {av.disciplina || 'Geral'}</div>
+                        <div><strong>Nota Conquistada:</strong> {av.resultado || 'Não informada'}</div>
+                      </div>
+
+                      {av.comentario && (
+                        <div className="solicitacao-msg">
+                          "{av.comentario}"
                         </div>
                       )}
                     </div>
@@ -1446,7 +1962,7 @@ function App() {
       {/* Seção de Avaliações Reais com Efeito de Fade-In e Fade-Out */}
       <section id="avaliacoes" className="section-wrapper">
         <div className="section-header reveal-on-scroll">
-          <span className="section-tag">Depoimentos Reais • Conta Google</span>
+          <span className="section-tag">Depoimentos Reais • E-mail Verificado</span>
           <h2 className="section-title">O que dizem os Pais e Alunos</h2>
           <p className="section-desc">
             Espaço aberto para avaliações reais de famílias e estudantes atendidos pelo ACCOR em Aldeia.
@@ -1454,24 +1970,22 @@ function App() {
         </div>
 
         <div className="avaliacoes-container reveal-on-scroll">
-          {/* Barra de Média e Ação de Avaliar */}
+          {/* Barra de Média Dinâmica do Banco de Dados e Ação de Avaliar */}
           <div className="avaliacoes-header-bar">
             <div className="avaliacoes-score-box">
-              <div className="score-number">
-                {avaliacoes.length > 0
-                  ? (avaliacoes.reduce((soma, item) => soma + (Number(item.estrelas) || 5), 0) / avaliacoes.length).toFixed(1)
-                  : '5.0'}
-              </div>
+              {avaliacoes.length > 0 && (
+                <div className="score-number">
+                  {mediaAvaliacoesNumero.toFixed(1)}
+                </div>
+              )}
               <div className="score-stars-group">
-                <div className="stars-row">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={18} fill="#F59E0B" color="#F59E0B" />
-                  ))}
+                <div className="stars-row google-stars-bar">
+                  {renderizarEstrelasGoogle(mediaAvaliacoesNumero, 20)}
                 </div>
                 <span className="score-subtext">
                   {avaliacoes.length > 0
-                    ? `${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação real verificada' : 'avaliações reais verificadas'} com Google`
-                    : 'Avaliações reais verificadas via e-mail Google (@gmail.com)'}
+                    ? `Média de ${mediaAvaliacoesNumero.toFixed(1)} estrelas (${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação no banco' : 'avaliações no banco'})`
+                    : 'Aguardando avaliações para calcular a média de estrelas'}
                 </span>
               </div>
             </div>
@@ -1480,6 +1994,7 @@ function App() {
               className="btn-nova-avaliacao"
               onClick={() => {
                 setErroAvaliacao('')
+                setHoverEstrelas(0)
                 setModalAvaliacaoAberta(true)
               }}
             >
@@ -1497,21 +2012,26 @@ function App() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '0.8rem' }}>
                   <div className="google-verified-badge">
                     <ShieldCheck size={14} />
-                    <span>Conta Google Verificada ({mascararEmailGoogle(avaliacoes[indiceAvaliacao]?.emailGoogle)})</span>
+                    <span>E-mail Verificado ({mascararEmailGoogle(avaliacoes[indiceAvaliacao]?.emailGoogle)})</span>
                   </div>
 
                   {avaliacoes[indiceAvaliacao]?.resultado && (
                     <div className="resultado-destaque-badge" style={{ marginBottom: 0 }}>
                       <CheckCircle2 size={14} />
-                      <span>{avaliacoes[indiceAvaliacao].resultado}</span>
+                      <span>
+                        {/^[0-9.,]+$/.test(String(avaliacoes[indiceAvaliacao].resultado).trim())
+                          ? `Nota conquistada: ${avaliacoes[indiceAvaliacao].resultado}`
+                          : avaliacoes[indiceAvaliacao].resultado}
+                      </span>
                     </div>
                   )}
                 </div>
 
-                <div className="stars-row" style={{ marginBottom: '0.6rem' }}>
-                  {[...Array(Number(avaliacoes[indiceAvaliacao]?.estrelas) || 5)].map((_, i) => (
-                    <Star key={i} size={16} fill="#F59E0B" color="#F59E0B" />
-                  ))}
+                <div className="stars-row" style={{ marginBottom: '0.6rem', alignItems: 'center', gap: '0.35rem' }}>
+                  {renderizarEstrelasGoogle(avaliacoes[indiceAvaliacao]?.estrelas || 5, 17)}
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#B45309', marginLeft: '0.25rem' }}>
+                    ({Number(avaliacoes[indiceAvaliacao]?.estrelas || 5).toFixed(1)})
+                  </span>
                 </div>
 
                 <p className="avaliacao-depoimento-texto">
@@ -1539,13 +2059,13 @@ function App() {
                 <Quote size={42} className="avaliacao-quote-icon" />
                 <div className="google-verified-badge" style={{ margin: '0 auto 0.8rem' }}>
                   <ShieldCheck size={15} />
-                  <span>Validação por E-mail Google (@gmail.com)</span>
+                  <span>Validação por E-mail</span>
                 </div>
                 <h3 style={{ fontSize: '1.35rem', color: '#1E293B', textAlign: 'center', marginBottom: '0.5rem' }}>
                   Seja o primeiro a deixar sua avaliação real!
                 </h3>
                 <p className="avaliacao-depoimento-texto" style={{ textAlign: 'center', justifyContent: 'center', fontStyle: 'normal', fontSize: '1rem', marginBottom: '1.2rem' }}>
-                  Nossas avaliações são 100% reais, publicadas por pais, responsáveis e alunos com conta Google verificada. Compartilhe sua experiência com o reforço escolar ACCOR!
+                  Nossas avaliações são 100% reais, publicadas por pais, responsáveis e alunos com e-mail verificado. Compartilhe sua experiência com o reforço escolar ACCOR!
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <button
@@ -1557,7 +2077,7 @@ function App() {
                     }}
                   >
                     <Sparkles size={16} />
-                    <span>Publicar Avaliação com E-mail Google</span>
+                    <span>Publicar Avaliação</span>
                   </button>
                 </div>
               </div>
@@ -1575,21 +2095,27 @@ function App() {
                 <ChevronLeft size={22} />
               </button>
 
-              <div className="carousel-dots-list">
-                {avaliacoes.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`carousel-dot ${idx === indiceAvaliacao ? 'active' : ''}`}
-                    onClick={() => {
-                      if (idx !== indiceAvaliacao) {
-                        const direcao = idx > indiceAvaliacao ? 'next' : 'prev'
-                        mudarSlideAvaliacao(direcao, idx)
-                      }
-                    }}
-                    title={`Ir para avaliação ${idx + 1}`}
-                  />
-                ))}
-              </div>
+              {avaliacoes.length <= 12 ? (
+                <div className="carousel-dots-list">
+                  {avaliacoes.map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`carousel-dot ${idx === indiceAvaliacao ? 'active' : ''}`}
+                      onClick={() => {
+                        if (idx !== indiceAvaliacao) {
+                          const direcao = idx > indiceAvaliacao ? 'next' : 'prev'
+                          mudarSlideAvaliacao(direcao, idx)
+                        }
+                      }}
+                      title={`Ir para avaliação ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#64748B', padding: '0 0.5rem' }}>
+                  {indiceAvaliacao + 1} / {avaliacoes.length}
+                </span>
+              )}
 
               <button 
                 className="btn-carousel-ctrl" 
@@ -1652,7 +2178,7 @@ function App() {
                   className="form-input" 
                   placeholder="Ex: Maria Clara"
                   value={formData.nomeResponsavel}
-                  onChange={(e) => setFormData({ ...formData, nomeResponsavel: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, nomeResponsavel: formatarApenasLetras(e.target.value) })}
                   required
                 />
               </div>
@@ -1665,13 +2191,14 @@ function App() {
                     className="form-input" 
                     placeholder="Ex: Pedro Henrique"
                     value={formData.nomeAluno}
-                    onChange={(e) => setFormData({ ...formData, nomeAluno: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nomeAluno: formatarApenasLetras(e.target.value) })}
                   />
                 </div>
                 <div className="form-group">
                   <label>WhatsApp / Telefone *</label>
                   <input 
                     type="tel" 
+                    inputMode="numeric"
                     className="form-input" 
                     placeholder="(81) 9XXXX-XXXX"
                     value={formData.telefone}
@@ -1686,10 +2213,11 @@ function App() {
                   <label>Série / Ano Escolar</label>
                   <input 
                     type="text" 
+                    inputMode="numeric"
                     className="form-input" 
-                    placeholder="Ex: 8º Ano / 2º Ano Médio"
+                    placeholder="Ex: 8 (para 8º ano)"
                     value={formData.serieEscolar}
-                    onChange={(e) => setFormData({ ...formData, serieEscolar: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, serieEscolar: formatarApenasNumeros(e.target.value, 2) })}
                   />
                 </div>
                 <div className="form-group">
@@ -1835,24 +2363,48 @@ function App() {
 
             <form onSubmit={handleNovaAvaliacaoSubmit}>
               <div className="form-group">
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span>E-mail do Google (Gmail) *</span>
-                  <span className="google-email-tag">Obrigatório • @gmail.com</span>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                  <span>E-mail para Identificação *</span>
+                  <span className="google-email-tag">Obrigatório</span>
                 </label>
-                <input 
-                  type="email" 
-                  className="form-input" 
-                  placeholder="seuemail@gmail.com"
-                  value={formNovaAvaliacao.emailGoogle}
-                  onChange={(e) => {
-                    setErroAvaliacao('')
-                    setFormNovaAvaliacao({ ...formNovaAvaliacao, emailGoogle: e.target.value })
-                  }}
-                  required
-                />
-                <small style={{ color: '#64748B', fontSize: '0.78rem', display: 'block', marginTop: '0.25rem' }}>
-                  🔒 Seu e-mail é usado para validar que a avaliação é de uma pessoa real e aparece mascarado no site.
-                </small>
+
+                {!usuarioGoogle ? (
+                  <div className="google-login-box">
+                    <button
+                      type="button"
+                      className="btn-google-oauth"
+                      onClick={iniciarLoginGoogle}
+                    >
+                      <ShieldCheck size={20} color="#2563EB" />
+                      <span>Informar E-mail para Avaliar</span>
+                    </button>
+                    <small style={{ color: '#64748B', fontSize: '0.78rem', display: 'block', marginTop: '0.45rem', textAlign: 'center' }}>
+                      🔒 Informe seu e-mail no pop-up para validar e liberar sua avaliação.
+                    </small>
+                  </div>
+                ) : (
+                  <div className="google-connected-card">
+                    <div className="google-connected-info">
+                      <div className="google-avatar-badge">
+                        <span>{(usuarioGoogle.email || 'E').charAt(0).toUpperCase()}</span>
+                      </div>
+                      <div>
+                        <div className="google-connected-name">
+                          E-mail Identificado
+                          <span className="google-connected-pill">✓ Verificado</span>
+                        </div>
+                        <div className="google-connected-email">{usuarioGoogle.email}</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-google-switch"
+                      onClick={desconectarContaGoogle}
+                    >
+                      Trocar e-mail
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -1862,7 +2414,7 @@ function App() {
                   className="form-input" 
                   placeholder="Ex: Vanessa Guimarães"
                   value={formNovaAvaliacao.nomeAutor}
-                  onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, nomeAutor: e.target.value })}
+                  onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, nomeAutor: formatarApenasLetras(e.target.value) })}
                   required
                 />
               </div>
@@ -1881,40 +2433,74 @@ function App() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Disciplina</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="Ex: Matemática e Redação"
+                  <label>Disciplina *</label>
+                  <select 
+                    className="form-select"
                     value={formNovaAvaliacao.disciplina}
                     onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, disciplina: e.target.value })}
-                  />
+                    required
+                  >
+                    {disciplinas.map((d) => (
+                      <option key={d.id || d.nome} value={d.nome}>
+                        {d.nome}
+                      </option>
+                    ))}
+                    <option value="Pacote Completo (Todas as Matérias)">Pacote Completo (Todas as Matérias)</option>
+                  </select>
                 </div>
                 <div className="form-group">
-                  <label>Resultado Conquistado</label>
+                  <label>Nota Conquistada</label>
                   <input 
                     type="text" 
+                    inputMode="decimal"
                     className="form-input" 
-                    placeholder="Ex: Nota 9.5 no bimestre"
+                    placeholder="Ex: 9.5"
                     value={formNovaAvaliacao.resultado}
-                    onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, resultado: e.target.value })}
+                    onChange={(e) => setFormNovaAvaliacao({ ...formNovaAvaliacao, resultado: formatarNotaNumerica(e.target.value) })}
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Avaliação (Estrelas)</label>
-                <div className="star-rating-select">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      type="button"
-                      key={star}
-                      className={`star-btn-select ${star <= formNovaAvaliacao.estrelas ? 'filled' : ''}`}
-                      onClick={() => setFormNovaAvaliacao({ ...formNovaAvaliacao, estrelas: star })}
-                    >
-                      <Star size={24} fill={star <= formNovaAvaliacao.estrelas ? '#F59E0B' : 'transparent'} />
-                    </button>
-                  ))}
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Avaliação (Estrelas) *</span>
+                  {(hoverEstrelas || formNovaAvaliacao.estrelas) > 0 && (
+                    <span className="google-star-score-pill">
+                      ⭐ {(hoverEstrelas || formNovaAvaliacao.estrelas)}.0 / 5.0
+                    </span>
+                  )}
+                </label>
+                <div
+                  className="star-rating-select google-interactive-stars"
+                  onMouseLeave={() => setHoverEstrelas(0)}
+                >
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const ativa = star <= (hoverEstrelas || formNovaAvaliacao.estrelas)
+                    return (
+                      <button
+                        type="button"
+                        key={star}
+                        className={`star-btn-select ${ativa ? 'filled' : ''}`}
+                        onMouseEnter={() => setHoverEstrelas(star)}
+                        onFocus={() => setHoverEstrelas(star)}
+                        onBlur={() => setHoverEstrelas(0)}
+                        onClick={() => {
+                          setErroAvaliacao('')
+                          setFormNovaAvaliacao({ ...formNovaAvaliacao, estrelas: star })
+                        }}
+                        title={`${star} ${star === 1 ? 'estrela' : 'estrelas'}`}
+                      >
+                        <Star
+                          size={30}
+                          fill={ativa ? '#FBBC04' : 'transparent'}
+                          color={ativa ? '#F59E0B' : '#CBD5E1'}
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+                <div className="google-star-label-hint">
+                  {obterRotuloEstrelasGoogle(hoverEstrelas || formNovaAvaliacao.estrelas)}
                 </div>
               </div>
 
@@ -1932,9 +2518,69 @@ function App() {
 
               <button type="submit" className="btn-submit-form">
                 <Send size={18} />
-                <span>Publicar Avaliação com Conta Google</span>
+                <span>Publicar Avaliação</span>
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up para Informar o E-mail (Sem vínculo com o Google) */}
+      {modalLoginGoogleAberto && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setModalLoginGoogleAberto(false)}>
+          <div className="google-signin-dialog fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="google-signin-header-bar">
+              <ShieldCheck size={18} color="#2563EB" />
+              <span>Identificação por E-mail</span>
+              <button
+                type="button"
+                onClick={() => setModalLoginGoogleAberto(false)}
+                style={{ marginLeft: 'auto', background: 'transparent', padding: '0.2rem', color: '#5F6368' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="google-signin-body">
+              <form onSubmit={avancarEtapaEmailGoogle}>
+                <h4 className="google-signin-title">Informe seu E-mail</h4>
+                <p className="google-signin-sub">Validação rápida para avaliar o <strong>ACCOR Reforço Escolar</strong></p>
+
+                {erroLoginGoogle && (
+                  <div className="google-signin-error">{erroLoginGoogle}</div>
+                )}
+
+                <div className="google-field-group">
+                  <label>Seu E-mail *</label>
+                  <input
+                    type="email"
+                    className="google-input"
+                    placeholder="seuemail@exemplo.com"
+                    value={dadosLoginGoogle.email}
+                    onChange={(e) => setDadosLoginGoogle({ ...dadosLoginGoogle, email: e.target.value })}
+                    autoFocus
+                    required
+                  />
+                </div>
+
+                <p className="google-privacy-note">
+                  🔒 Seu e-mail é usado apenas para validar que a avaliação é real e aparece mascarado no site.
+                </p>
+
+                <div className="google-signin-actions">
+                  <button
+                    type="button"
+                    className="btn-google-link"
+                    onClick={() => setModalLoginGoogleAberto(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-google-primary">
+                    Confirmar E-mail
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -1950,6 +2596,19 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Botão Flutuante Voltar ao Topo */}
+      <button
+        ref={btnTopoRef}
+        type="button"
+        className="btn-back-to-top"
+        onClick={voltarAoTopo}
+        aria-label="Voltar ao topo da página"
+        title="Voltar ao topo"
+      >
+        <ArrowUp size={20} strokeWidth={2.5} />
+        <span>Topo</span>
+      </button>
       </main>
     </div>
   )

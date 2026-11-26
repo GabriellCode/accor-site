@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/professores")
@@ -25,14 +26,29 @@ public class ProfessorController {
     }
 
     @PostMapping
-    public ResponseEntity<Professor> criar(@RequestBody Professor professor) {
+    public ResponseEntity<?> criar(
+        @RequestBody Professor professor,
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        if (!AuthController.validarTokenAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("erro", "Acesso restrito ao administrador."));
+        }
         professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Professor> atualizar(@PathVariable Long id, @RequestBody Professor dadosAtualizados) {
+    public ResponseEntity<?> atualizar(
+        @PathVariable Long id,
+        @RequestBody Professor dadosAtualizados,
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        if (!AuthController.validarTokenAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("erro", "Acesso restrito ao administrador."));
+        }
         return professorRepository.findById(id).map(existente -> {
             if (dadosAtualizados.getNome() != null) existente.setNome(dadosAtualizados.getNome());
             if (dadosAtualizados.getCargo() != null) existente.setCargo(dadosAtualizados.getCargo());
@@ -49,7 +65,14 @@ public class ProfessorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<?> deletar(
+        @PathVariable Long id,
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        if (!AuthController.validarTokenAdmin(authHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("erro", "Acesso restrito ao administrador."));
+        }
         if (!professorRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

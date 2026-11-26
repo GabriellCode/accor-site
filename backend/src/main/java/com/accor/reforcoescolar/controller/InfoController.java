@@ -11,11 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/info")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class InfoController {
 
-    @GetMapping
+    @GetMapping({"", "/", "/info"})
     public EscolaInfoDTO getInfo() {
         List<ProfessorDTO> listaProfessores = Arrays.asList(
             new ProfessorDTO(
